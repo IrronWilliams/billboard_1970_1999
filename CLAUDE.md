@@ -47,6 +47,10 @@ App is available at **http://localhost:3001**.
 - **`better-sqlite3` is a native module** — `.dockerignore` excludes `node_modules` so it recompiles inside the container. If running outside Docker via `npm start`, it must be compiled against the local Node version.
 - The SQLite database is persisted in the `db_data` named Docker volume at `/app/data/data.db` inside the container.
 
+## GitHub integration
+
+A Claude Code GitHub Actions workflow is configured at `.github/workflows/claude.yml`. Tag `@claude` in any issue or PR comment to trigger it. The workflow uses `ANTHROPIC_API_KEY` stored as a repository secret.
+
 ## Planned features
 
 - Song rating system
