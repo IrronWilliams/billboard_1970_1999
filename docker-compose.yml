@@ -1,0 +1,25 @@
+services:
+  node:
+    image: billboardrankings-node
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    environment:
+      PORT: 3001
+    volumes:
+      - db_data:/app/data
+    restart: unless-stopped
+
+  web:
+    image: billboardrankings-web
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "3001:80"
+    depends_on:
+      - node
+    restart: unless-stopped
+
+volumes:
+  db_data:

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Player</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111;
+      color: #eee;
+      font-family: sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .player {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      width: 320px;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 32px;
+    }
+
+    .visualizer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      height: 48px;
+      margin-bottom: 32px;
+    }
+
+    .bar {
+      width: 4px;
+      background: #e44;
+      border-radius: 2px;
+      height: 4px;
+      transition: height 0.1s;
+    }
+
+    .playing .bar:nth-child(1) { animation: bounce 0.8s ease-in-out infinite; }
+    .playing .bar:nth-child(2) { animation: bounce 0.9s ease-in-out 0.1s infinite; }
+    .playing .bar:nth-child(3) { animation: bounce 0.7s ease-in-out 0.2s infinite; }
+    .playing .bar:nth-child(4) { animation: bounce 1.0s ease-in-out 0.05s infinite; }
+    .playing .bar:nth-child(5) { animation: bounce 0.85s ease-in-out 0.15s infinite; }
+    .playing .bar:nth-child(6) { animation: bounce 0.75s ease-in-out 0.25s infinite; }
+    .playing .bar:nth-child(7) { animation: bounce 0.95s ease-in-out 0.1s infinite; }
+
+    @keyframes bounce {
+      0%, 100% { height: 4px; }
+      50% { height: 40px; }
+    }
+
+    .play-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: none;
+      background: #e44;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .play-btn:hover { background: #f55; }
+    .play-btn:active { transform: scale(0.95); }
+
+    .status {
+      font-size: 0.8rem;
+      color: #666;
+      min-height: 1.2em;
+    }
+
+    .volume-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .volume-row label {
+      font-size: 0.75rem;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    input[type=range] {
+      flex: 1;
+      accent-color: #e44;
+    }
+  </style>
+</head>
+<body>
+  <div class="player">
+    <h1>Live Radio</h1>
+
+    <div class="visualizer" id="viz">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+
+    <button class="play-btn" id="playBtn" title="Play / Pause">&#9654;</button>
+
+    <div class="status" id="status">Click to start</div>
+
+    <div class="volume-row">
+      <label>Vol</label>
+      <input type="range" id="volume" min="0" max="1" step="0.02" value="1">
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+  <script>
+    const STREAM = 'https://d3d4yli4hf5bmh.cloudfront.net/hls/live.m3u8';
+    const audio   = new Audio();
+    const btn     = document.getElementById('playBtn');
+    const status  = document.getElementById('status');
+    const viz     = document.getElementById('viz');
+    const volCtrl = document.getElementById('volume');
+
+    let playing = false;
+    let hlsReady = false;
+
+    function setStatus(msg) { status.textContent = msg; }
+
+    function initHls() {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(STREAM);
+        hls.attachMedia(audio);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => { hlsReady = true; setStatus('Ready'); });
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if (data.fatal) setStatus('Stream error — retrying…');
+        });
+      } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari native HLS
+        audio.src = STREAM;
+        hlsReady = true;
+        setStatus('Ready');
+      } else {
+        setStatus('HLS not supported in this browser');
+      }
+    }
+
+    initHls();
+
+    btn.addEventListener('click', () => {
+      if (!hlsReady) { setStatus('Loading…'); return; }
+      if (playing) {
+        audio.pause();
+        btn.innerHTML = '&#9654;';
+        viz.classList.remove('playing');
+        setStatus('Paused');
+        playing = false;
+      } else {
+        audio.play().then(() => {
+          btn.innerHTML = '&#9646;&#9646;';
+          viz.classList.add('playing');
+          setStatus('Live');
+          playing = true;
+        }).catch(() => setStatus('Playback blocked — try again'));
+      }
+    });
+
+    volCtrl.addEventListener('input', () => { audio.volume = volCtrl.value; });
+  </script>
+</body>
+</html>
