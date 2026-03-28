@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-An online radio station website for Billboard's Top 100 songs from 1970–1999. Users can listen to a live HLS stream and — in upcoming features — rate songs, read lyrics, and view title art.
+An online radio station website for Billboard's Top 100 songs from 1970–1999. Users can listen to a live HLS stream and rate songs. Each decade (70s, 80s, 90s) has its own era-styled player page. Planned additions: lyrics display and album/title art.
 
 ## Tech stack
 
@@ -19,6 +19,11 @@ An online radio station website for Billboard's Top 100 songs from 1970–1999. 
 
 ```
 public/          Static files baked into nginx at build time (HTML, CSS, JS, images)
+  index.html     Original base player page
+  70s.html       Era-styled player — 1970s (vinyl record, warm earth tones)
+  80s.html       Era-styled player — 1980s (cassette tape, synthwave neon)
+  90s.html       Era-styled player — 1990s (CD disc, teal/charcoal)
+docs/            Decision logs — one Markdown file per session, named YYYY-MM-DD-*.md
 index.js         Express entry point — add all API routes here
 db.js            Exports a single shared better-sqlite3 connection (WAL mode, foreign keys on)
 nginx.conf       nginx config — serves public/, proxies /api/* to Express
@@ -51,8 +56,14 @@ App is available at **http://localhost:3001**.
 
 A Claude Code GitHub Actions workflow is configured at `.github/workflows/claude.yml`. Tag `@claude` in any issue or PR comment to trigger it. The workflow uses `ANTHROPIC_API_KEY` stored as a repository secret.
 
-## Planned features
+## Feature status
 
-- Song rating system
-- Song lyrics display
-- Title / album art display
+| Feature | Status | Notes |
+|---|---|---|
+| Live HLS stream playback | ✅ Done | hls.js (CDN) + Safari native fallback |
+| Era-styled player pages (70s, 80s, 90s) | ✅ Done | `public/70s.html`, `80s.html`, `90s.html` |
+| Animated waveform + media element spin | ✅ Done | All three player pages |
+| Song rating (thumbs up / down) | ✅ UI done | Client-side only — no API or DB persistence yet |
+| Song lyrics display | 🔲 Planned | |
+| Album / title art display | 🔲 Planned | |
+| Rating persistence via API + DB | 🔲 Planned | UI hooks are in place; needs `/api/ratings` route and DB schema |
