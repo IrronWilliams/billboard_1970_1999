@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power 80s — Live Radio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:          #07001a;
+      --card-bg:     #0c0022;
+      --card-edge:   #38007a;
+      --neon-pink:   #ff1a75;
+      --neon-cyan:   #00e5ff;
+      --neon-purple: #9900ee;
+      --text:        #ead8ff;
+      --muted:       #6040a8;
+      --dim:         #20084a;
+      --green-vote:  #00ff88;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg);
+      background-image:
+        /* Horizon glow */
+        radial-gradient(ellipse 90% 45% at 50% 92%, rgba(255,26,117,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 65% 30% at 50% 100%, rgba(120,0,255,0.22) 0%, transparent 60%),
+        /* Grid lines */
+        linear-gradient(rgba(0,229,255,0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,26,117,0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 46px 46px, 46px 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    /* CRT scanline overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.035) 3px, rgba(0,0,0,0.035) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── CARD ── */
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      background: var(--card-bg);
+      border: 1px solid var(--neon-pink);
+      border-radius: 8px;
+      padding: 30px 26px 24px;
+      box-shadow:
+        0 0 0 1px rgba(255,26,117,0.25),
+        0 0 22px rgba(255,26,117,0.22),
+        0 0 70px rgba(255,26,117,0.07),
+        inset 0 0 50px rgba(80,0,200,0.06);
+      z-index: 1;
+    }
+
+    /* Diagonal gradient sheen inside card */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      background: linear-gradient(135deg,
+        rgba(255,26,117,0.06) 0%,
+        transparent 35%,
+        transparent 65%,
+        rgba(0,229,255,0.05) 100%);
+      pointer-events: none;
+    }
+
+    /* ── LIVE BADGE ── */
+    .live-badge {
+      position: absolute;
+      top: 14px; right: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,26,117,0.1);
+      border: 1px solid rgba(255,26,117,0.65);
+      border-radius: 4px;
+      padding: 3px 9px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--neon-pink);
+      text-shadow: 0 0 8px var(--neon-pink);
+    }
+
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--neon-pink);
+      box-shadow: 0 0 6px var(--neon-pink);
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.28; transform: scale(0.48); }
+    }
+
+    /* ── STATION ── */
+    .station {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .station-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: 0.22em;
+      color: var(--neon-pink);
+      text-shadow:
+        0 0 8px var(--neon-pink),
+        0 0 22px rgba(255,26,117,0.55),
+        0 0 50px rgba(255,26,117,0.2);
+      line-height: 1;
+    }
+
+    .station-sub {
+      font-size: 0.54rem;
+      letter-spacing: 0.36em;
+      color: var(--muted);
+      margin-top: 5px;
+      text-transform: uppercase;
+    }
+
+    /* ── MEDIA ROW ── */
+    .media-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    /* ── CASSETTE TAPE ── */
+    .cassette {
+      flex-shrink: 0;
+      width: 168px;
+      height: 106px;
+      border-radius: 8px;
+      background: #13111e;
+      border: 1.5px solid #2a2048;
+      position: relative;
+      box-shadow:
+        0 0 0 1px #060410,
+        0 0 18px rgba(255,26,117,0.15),
+        0 8px 28px rgba(0,0,0,0.88),
+        inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+
+    /* Screw posts — 4 corners + 1 bottom-center */
+    .screw {
+      position: absolute;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #1a1630;
+      border: 1px solid #2e2850;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.8);
+    }
+
+    /* Phillips cross slot on each screw */
+    .screw::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(#3a3060 0%, #3a3060 100%) center / 1px 55% no-repeat,
+        linear-gradient(#3a3060 0%, #3a3060 100%) center / 55% 1px no-repeat;
+    }
+
+    /* Label sticker */
+    .cassette-label {
+      position: absolute;
+      top: 7px; left: 12px; right: 12px;
+      height: 52px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: linear-gradient(135deg,
+        #5500bb 0%,
+        #cc0066 48%,
+        #0055cc 100%);
+    }
+
+    /* Dark band at top of label (tape-type strip) */
+    .cassette-label::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 14px;
+      background: rgba(0,0,0,0.38);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Gloss sheen */
+    .cassette-label::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(170deg,
+        rgba(255,255,255,0.14) 0%,
+        rgba(255,255,255,0.04) 35%,
+        transparent 65%);
+    }
+
+    .label-station {
+      position: absolute;
+      top: 18px; left: 0; right: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.66rem;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      color: #fff;
+      text-align: center;
+      text-shadow:
+        0 0 10px rgba(0,0,0,0.7),
+        0 0 20px rgba(255,26,117,0.4);
+      z-index: 1;
+    }
+
+    .label-meta {
+      position: absolute;
+      bottom: 6px; left: 0; right: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.35rem;
+      letter-spacing: 0.16em;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      z-index: 1;
+    }
+
+    /* Tape window */
+    .cassette-window {
+      position: absolute;
+      top: 64px; left: 14px; right: 14px;
+      height: 32px;
+      background: #07050f;
+      border: 1px solid #252040;
+      border-radius: 3px;
+    }
+
+    /* Guide roller posts flanking each reel */
+    .cassette-window::before,
+    .cassette-window::after {
+      content: '';
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #1c1a2e;
+      border: 1px solid #363460;
+    }
+    .cassette-window::before { left: 31px; }
+    .cassette-window::after  { right: 31px; }
+
+    /* Tape strip spanning between reels */
+    .tape-strip {
+      position: absolute;
+      bottom: 6px; left: 36px; right: 36px;
+      height: 3px;
+      background: linear-gradient(90deg, #252040, #181430, #252040);
+      border-radius: 1px;
+    }
+
+    /* Reels */
+    .reel {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .reel-l { left: 7px; }
+    .reel-r { right: 7px; }
+
+    /* 3-spoke reel built from conic + radial gradients — no extra elements */
+    .reel-hub {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background:
+        /* Center cap + ring */
+        radial-gradient(circle, #08060e 0%, #08060e 22%, #363470 22%, #363470 34%, transparent 34%),
+        /* 3 spoke segments */
+        conic-gradient(
+          #1a1830  0deg,  #1a1830  98deg,
+          #2e2c60  98deg, #2e2c60 122deg,
+          #1a1830 122deg, #1a1830 218deg,
+          #2e2c60 218deg, #2e2c60 242deg,
+          #1a1830 242deg, #1a1830 338deg,
+          #2e2c60 338deg, #2e2c60 360deg
+        );
+      border: 1px solid #3a3878;
+      box-shadow: 0 0 4px rgba(0,0,0,0.6);
+    }
+
+    /* Reels rotate when cassette has .spinning — whole cassette stays still */
+    .cassette.spinning .reel-hub {
+      animation: spin 1.3s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ARTIST PHOTO ── */
+    .artist-photo {
+      flex-shrink: 0;
+      width: 118px; height: 118px;
+      border-radius: 6px;
+      border: 1px solid var(--neon-cyan);
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(0,229,255,0.2),
+        0 0 16px rgba(0,229,255,0.28),
+        0 6px 20px rgba(0,0,0,0.72);
+    }
+
+    .artist-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .artist-photo-placeholder {
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(150deg, #1a0048 0%, #07001a 100%);
+    }
+
+    .artist-initials {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      text-shadow:
+        0 0 10px var(--neon-cyan),
+        0 0 24px rgba(0,229,255,0.45);
+    }
+
+    .artist-photo-sub {
+      font-size: 0.44rem;
+      letter-spacing: 0.22em;
+      color: var(--muted);
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    /* Corner neon marks — top-left cyan, bottom-right pink */
+    .artist-photo::before,
+    .artist-photo::after {
+      content: '';
+      position: absolute;
+      width: 12px; height: 12px;
+      pointer-events: none;
+    }
+    .artist-photo::before {
+      top: 0; left: 0;
+      border-top: 2px solid var(--neon-cyan);
+      border-left: 2px solid var(--neon-cyan);
+    }
+    .artist-photo::after {
+      bottom: 0; right: 0;
+      border-bottom: 2px solid var(--neon-pink);
+      border-right: 2px solid var(--neon-pink);
+    }
+
+    /* ── SONG INFO ── */
+    .song-info {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .song-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 6px;
+      text-shadow: 0 0 14px rgba(234,216,255,0.28);
+    }
+
+    .artist-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      text-shadow: 0 0 8px rgba(0,229,255,0.45);
+    }
+
+    .song-year {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--muted);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(255,26,117,0.5),
+        rgba(0,229,255,0.5),
+        transparent);
+      margin: 14px 0;
+    }
+
+    /* ── WAVEFORM ── */
+    .waveform {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 38px;
+      margin-bottom: 18px;
+    }
+
+    .wave-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: linear-gradient(to top, var(--neon-pink), var(--neon-cyan));
+      height: 4px;
+      box-shadow: 0 0 4px rgba(255,26,117,0.35);
+    }
+
+    .waveform.playing .wave-bar {
+      animation-name: wave;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+
+    .waveform.playing .wave-bar:nth-child(1)  { animation-duration: .80s; animation-delay: .00s; }
+    .waveform.playing .wave-bar:nth-child(2)  { animation-duration: .65s; animation-delay: .10s; }
+    .waveform.playing .wave-bar:nth-child(3)  { animation-duration: .90s; animation-delay: .05s; }
+    .waveform.playing .wave-bar:nth-child(4)  { animation-duration: .72s; animation-delay: .20s; }
+    .waveform.playing .wave-bar:nth-child(5)  { animation-duration: .85s; animation-delay: .15s; }
+    .waveform.playing .wave-bar:nth-child(6)  { animation-duration: .70s; animation-delay: .08s; }
+    .waveform.playing .wave-bar:nth-child(7)  { animation-duration: .95s; animation-delay: .25s; }
+    .waveform.playing .wave-bar:nth-child(8)  { animation-duration: .75s; animation-delay: .12s; }
+    .waveform.playing .wave-bar:nth-child(9)  { animation-duration: .88s; animation-delay: .18s; }
+    .waveform.playing .wave-bar:nth-child(10) { animation-duration: .68s; animation-delay: .22s; }
+    .waveform.playing .wave-bar:nth-child(11) { animation-duration: .82s; animation-delay: .06s; }
+    .waveform.playing .wave-bar:nth-child(12) { animation-duration: .78s; animation-delay: .14s; }
+    .waveform.playing .wave-bar:nth-child(13) { animation-duration: .92s; animation-delay: .09s; }
+    .waveform.playing .wave-bar:nth-child(14) { animation-duration: .66s; animation-delay: .19s; }
+
+    @keyframes wave {
+      0%, 100% { height: 4px; }
+      50%       { height: 30px; }
+    }
+
+    /* ── PLAY BUTTON ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .play-btn {
+      width: 70px; height: 70px;
+      border-radius: 50%;
+      border: 2px solid var(--neon-pink);
+      background: linear-gradient(145deg, #26005e 0%, #0c0022 100%);
+      color: var(--neon-pink);
+      font-size: 1.55rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow:
+        0 0 0 1px rgba(255,26,117,0.3),
+        0 0 18px rgba(255,26,117,0.45),
+        0 0 38px rgba(255,26,117,0.15),
+        0 5px 18px rgba(0,0,0,0.65);
+    }
+
+    .play-btn:hover {
+      background: linear-gradient(145deg, #380090 0%, #1a0050 100%);
+      box-shadow:
+        0 0 0 1px rgba(255,26,117,0.5),
+        0 0 26px rgba(255,26,117,0.65),
+        0 0 55px rgba(255,26,117,0.2),
+        0 5px 22px rgba(0,0,0,0.65);
+      transform: scale(1.07);
+    }
+
+    .play-btn:active { transform: scale(0.95); }
+    .play-btn.state-play  { padding-left: 4px; }
+    .play-btn.state-pause { padding-left: 0; }
+
+    /* ── VOLUME ── */
+    .volume-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .speaker-icon {
+      font-size: 1rem;
+      min-width: 22px;
+      text-align: center;
+      transition: opacity 0.3s;
+    }
+
+    .speaker-icon.dim { opacity: 0.24; }
+
+    input[type=range] {
+      flex: 1;
+      height: 3px;
+      -webkit-appearance: none;
+      appearance: none;
+      border-radius: 2px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--neon-pink);
+      border: 2px solid var(--text);
+      box-shadow: 0 0 8px var(--neon-pink), 0 0 16px rgba(255,26,117,0.4);
+      cursor: pointer;
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--neon-pink);
+      border: 2px solid var(--text);
+      box-shadow: 0 0 8px var(--neon-pink);
+      cursor: pointer;
+    }
+
+    .vol-pct {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      color: var(--muted);
+      min-width: 40px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── RATING ── */
+    .rating-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .rating-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.53rem;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      text-transform: uppercase;
+      flex: 1;
+    }
+
+    .rating-btns { display: flex; gap: 10px; }
+
+    .thumb-btn {
+      position: relative;
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      border: 1px solid var(--dim);
+      background: rgba(4,0,24,0.6);
+      color: var(--muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .thumb-btn:hover {
+      border-color: var(--neon-pink);
+      color: var(--text);
+      box-shadow: 0 0 12px rgba(255,26,117,0.35);
+      transform: scale(1.08);
+    }
+
+    .thumb-btn:active { transform: scale(0.93); }
+
+    .thumb-btn.voted-up {
+      background: rgba(0,255,136,0.08);
+      border-color: var(--green-vote);
+      color: var(--green-vote);
+      box-shadow: 0 0 14px rgba(0,255,136,0.3);
+    }
+
+    .thumb-btn.voted-down {
+      background: rgba(255,26,117,0.1);
+      border-color: var(--neon-pink);
+      color: var(--neon-pink);
+      box-shadow: 0 0 14px rgba(255,26,117,0.3);
+    }
+
+    .vote-count {
+      position: absolute;
+      top: -6px; right: -6px;
+      min-width: 18px; height: 18px;
+      border-radius: 9px;
+      background: var(--neon-pink);
+      color: #07001a;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      box-shadow: 0 0 6px var(--neon-pink);
+    }
+
+    .vote-count.show { opacity: 1; }
+
+    /* ── STATUS ── */
+    .status-bar {
+      text-align: center;
+      margin-top: 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.53rem;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      min-height: 1em;
+      text-transform: uppercase;
+    }
+
+    /* ── FOOTER ── */
+    .card-footer {
+      margin-top: 18px;
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.44rem;
+      letter-spacing: 0.3em;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Live Badge -->
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    LIVE
+  </div>
+
+  <!-- Station -->
+  <div class="station">
+    <div class="station-name">POWER 80s</div>
+    <div class="station-sub">Billboard Top 100 &bull; The 1980s</div>
+  </div>
+
+  <!-- Cassette + Artist Photo -->
+  <div class="media-row">
+
+    <div class="cassette" id="record">
+      <!-- Corner screws -->
+      <div class="screw" style="top:4px;left:4px"></div>
+      <div class="screw" style="top:4px;right:4px"></div>
+      <div class="screw" style="bottom:4px;left:4px"></div>
+      <div class="screw" style="bottom:4px;right:4px"></div>
+      <!-- Bottom-center screw -->
+      <div class="screw" style="bottom:4px;left:50%;transform:translateX(-50%)"></div>
+
+      <!-- Label sticker -->
+      <div class="cassette-label">
+        <div class="label-station">POWER 80s</div>
+        <div class="label-meta">SIDE &#9654; A &nbsp;&bull;&nbsp; 46 MIN</div>
+      </div>
+
+      <!-- Tape window with spinning reels -->
+      <div class="cassette-window">
+        <div class="reel reel-l"><div class="reel-hub"></div></div>
+        <div class="reel reel-r"><div class="reel-hub"></div></div>
+        <div class="tape-strip"></div>
+      </div>
+    </div>
+
+    <div class="artist-photo">
+      <!-- Replace the placeholder below with <img src="..." alt="Artist"> when a photo is available -->
+      <div class="artist-photo-placeholder">
+        <div class="artist-initials">MJ</div>
+        <div class="artist-photo-sub">Artist</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Song Info -->
+  <div class="song-info">
+    <div class="song-title" id="songTitle">Billie Jean</div>
+    <div class="artist-name" id="artistName">Michael Jackson</div>
+    <div class="song-year" id="songYear">&bull;&nbsp;1983&nbsp;&bull;</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Waveform -->
+  <div class="waveform" id="waveform">
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div>
+  </div>
+
+  <!-- Play / Pause -->
+  <div class="controls">
+    <button class="play-btn state-play" id="playBtn" title="Play / Pause">&#9654;</button>
+  </div>
+
+  <!-- Volume -->
+  <div class="volume-row">
+    <span class="speaker-icon" id="speakerIcon">🔊</span>
+    <input type="range" id="volSlider" min="0" max="1" step="0.01" value="1">
+    <span class="vol-pct" id="volPct">100%</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Rating -->
+  <div class="rating-section">
+    <div class="rating-label">Rate this song</div>
+    <div class="rating-btns">
+      <button class="thumb-btn" id="thumbUp" title="Love it">
+        👍
+        <span class="vote-count" id="upCount"></span>
+      </button>
+      <button class="thumb-btn" id="thumbDown" title="Not for me">
+        👎
+        <span class="vote-count" id="downCount"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="status-bar" id="status">Click play to engage</div>
+
+  <div class="card-footer">Billboard &bull; Top 100 &bull; 1980 – 1989</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+<script>
+  const STREAM = 'https://d3d4yli4hf5bmh.cloudfront.net/hls/live.m3u8';
+
+  const audio     = new Audio();
+  const record    = document.getElementById('record');
+  const waveform  = document.getElementById('waveform');
+  const playBtn   = document.getElementById('playBtn');
+  const statusEl  = document.getElementById('status');
+  const volSlider = document.getElementById('volSlider');
+  const volPct    = document.getElementById('volPct');
+  const speakerEl = document.getElementById('speakerIcon');
+  const thumbUp   = document.getElementById('thumbUp');
+  const thumbDown = document.getElementById('thumbDown');
+  const upCount   = document.getElementById('upCount');
+  const downCount = document.getElementById('downCount');
+
+  let isPlaying = false;
+  let hlsReady  = false;
+  let upVotes   = 0;
+  let downVotes = 0;
+  let userVote  = null; // 'up' | 'down' | null
+
+  // ── HLS INIT ──
+  (function initHls() {
+    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+      const hls = new Hls({ enableWorker: true });
+      hls.loadSource(STREAM);
+      hls.attachMedia(audio);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        hlsReady = true;
+        setStatus('Signal acquired — ready');
+      });
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) setStatus('Signal lost — retrying...');
+      });
+    } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+      audio.src = STREAM;
+      hlsReady  = true;
+      setStatus('Signal acquired — ready');
+    } else {
+      setStatus('HLS not supported in this browser');
+    }
+  })();
+
+  // ── PLAY / PAUSE ──
+  playBtn.addEventListener('click', () => {
+    if (!hlsReady) { setStatus('Loading signal...'); return; }
+    if (isPlaying) {
+      audio.pause();
+      setPlayState(false);
+    } else {
+      audio.play()
+        .then(() => setPlayState(true))
+        .catch(() => setStatus('Playback blocked — try again'));
+    }
+  });
+
+  function setPlayState(playing) {
+    isPlaying = playing;
+    if (playing) {
+      playBtn.innerHTML = '&#9646;&#9646;';
+      playBtn.classList.replace('state-play', 'state-pause');
+      record.classList.add('spinning');
+      waveform.classList.add('playing');
+      setStatus('Live &bull; On air now');
+    } else {
+      playBtn.innerHTML = '&#9654;';
+      playBtn.classList.replace('state-pause', 'state-play');
+      record.classList.remove('spinning');
+      waveform.classList.remove('playing');
+      setStatus('Paused');
+    }
+  }
+
+  // ── VOLUME ──
+  function syncVolume() {
+    const v   = parseFloat(volSlider.value);
+    const pct = Math.round(v * 100);
+    audio.volume = v;
+    volPct.textContent = pct + '%';
+
+    // Neon pink fill on track
+    volSlider.style.background =
+      `linear-gradient(90deg, #ff1a75 ${pct}%, #20084a ${pct}%)`;
+
+    // Speaker icon dims at low volume
+    if (pct === 0) {
+      speakerEl.textContent = '🔇';
+      speakerEl.classList.add('dim');
+    } else if (pct < 35) {
+      speakerEl.textContent = '🔉';
+      speakerEl.classList.add('dim');
+    } else {
+      speakerEl.textContent = '🔊';
+      speakerEl.classList.remove('dim');
+    }
+  }
+
+  volSlider.addEventListener('input', syncVolume);
+  syncVolume();
+
+  // ── RATING ──
+  thumbUp.addEventListener('click', () => {
+    if (userVote === 'up') {
+      upVotes--;
+      userVote = null;
+      thumbUp.classList.remove('voted-up');
+    } else {
+      if (userVote === 'down') {
+        downVotes = Math.max(0, downVotes - 1);
+        thumbDown.classList.remove('voted-down');
+      }
+      upVotes++;
+      userVote = 'up';
+      thumbUp.classList.add('voted-up');
+    }
+    renderVotes();
+  });
+
+  thumbDown.addEventListener('click', () => {
+    if (userVote === 'down') {
+      downVotes--;
+      userVote = null;
+      thumbDown.classList.remove('voted-down');
+    } else {
+      if (userVote === 'up') {
+        upVotes = Math.max(0, upVotes - 1);
+        thumbUp.classList.remove('voted-up');
+      }
+      downVotes++;
+      userVote = 'down';
+      thumbDown.classList.add('voted-down');
+    }
+    renderVotes();
+  });
+
+  function renderVotes() {
+    upCount.textContent   = upVotes;
+    downCount.textContent = downVotes;
+    upCount.classList.toggle('show',   upVotes   > 0);
+    downCount.classList.toggle('show', downVotes > 0);
+  }
+
+  function setStatus(msg) { statusEl.innerHTML = msg; }
+</script>
+
+</body>
+</html>
