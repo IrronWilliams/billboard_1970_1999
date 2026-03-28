@@ -500,6 +500,7 @@
       min-width: 22px;
       text-align: center;
       transition: opacity 0.3s;
+      cursor: pointer;
     }
 
     .speaker-icon.dim { opacity: 0.22; }
@@ -854,7 +855,19 @@
     }
   }
 
-  volSlider.addEventListener('input', syncVolume);
+  volSlider.addEventListener('input', () => {
+    audio.muted = false;
+    syncVolume();
+  });
+  speakerEl.addEventListener('click', () => {
+    audio.muted = !audio.muted;
+    if (audio.muted) {
+      speakerEl.textContent = '🔇';
+      speakerEl.classList.add('dim');
+    } else {
+      syncVolume();
+    }
+  });
   syncVolume();
 
   // ── RATING ──

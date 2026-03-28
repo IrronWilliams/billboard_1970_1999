@@ -416,6 +416,52 @@
       color: var(--muted);
     }
 
+    /* ── QUALITY PANEL ── */
+    .quality-panel {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      background: #05001a;
+      border: 1px solid #2a0060;
+      border-radius: 4px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+    }
+
+    .ql-block {
+      flex: 1;
+      padding: 5px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .ql-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.44rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: rgba(0,229,255,0.45);
+      text-transform: uppercase;
+    }
+
+    .ql-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      color: var(--neon-cyan);
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 6px rgba(0,229,255,0.4);
+      white-space: nowrap;
+    }
+
+    .ql-sep {
+      width: 1px;
+      background: #1a0050;
+      flex-shrink: 0;
+      margin: 6px 0;
+    }
+
     /* ── DIVIDER ── */
     .divider {
       height: 1px;
@@ -525,6 +571,7 @@
       min-width: 22px;
       text-align: center;
       transition: opacity 0.3s;
+      cursor: pointer;
     }
 
     .speaker-icon.dim { opacity: 0.24; }
@@ -729,6 +776,29 @@
     <div class="song-year" id="songYear">&bull;&nbsp;1983&nbsp;&bull;</div>
   </div>
 
+  <!-- Stream Quality Panel -->
+  <div class="quality-panel">
+    <div class="ql-block">
+      <div class="ql-label">Source</div>
+      <div class="ql-value">LOSSLESS HLS</div>
+    </div>
+    <div class="ql-sep"></div>
+    <div class="ql-block">
+      <div class="ql-label">Quality</div>
+      <div class="ql-value">CD QUALITY</div>
+    </div>
+    <div class="ql-sep"></div>
+    <div class="ql-block">
+      <div class="ql-label">Sample Rate</div>
+      <div class="ql-value">44.1 kHz</div>
+    </div>
+    <div class="ql-sep"></div>
+    <div class="ql-block">
+      <div class="ql-label">Channels</div>
+      <div class="ql-value">STEREO</div>
+    </div>
+  </div>
+
   <div class="divider"></div>
 
   <!-- Waveform -->
@@ -876,7 +946,19 @@
     }
   }
 
-  volSlider.addEventListener('input', syncVolume);
+  volSlider.addEventListener('input', () => {
+    audio.muted = false;
+    syncVolume();
+  });
+  speakerEl.addEventListener('click', () => {
+    audio.muted = !audio.muted;
+    if (audio.muted) {
+      speakerEl.textContent = '🔇';
+      speakerEl.classList.add('dim');
+    } else {
+      syncVolume();
+    }
+  });
   syncVolume();
 
   // ── RATING ──
