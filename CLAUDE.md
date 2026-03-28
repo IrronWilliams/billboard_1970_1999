@@ -21,8 +21,14 @@ An online radio station website for Billboard's Top 100 songs from 1970–1999. 
 public/          Static files baked into nginx at build time (HTML, CSS, JS, images)
   index.html     Original base player page
   70s.html       Era-styled player — 1970s (vinyl record, warm earth tones)
+  70s.css        Styles for 70s player
+  70s.js         JavaScript for 70s player
   80s.html       Era-styled player — 1980s (cassette tape, synthwave neon)
+  80s.css        Styles for 80s player
+  80s.js         JavaScript for 80s player
   90s.html       Era-styled player — 1990s (CD disc, teal/charcoal)
+  90s.css        Styles for 90s player
+  90s.js         JavaScript for 90s player
 docs/            Decision logs — one Markdown file per session, named YYYY-MM-DD-*.md
 index.js         Express entry point — add all API routes here
 db.js            Exports a single shared better-sqlite3 connection (WAL mode, foreign keys on)
