@@ -9,6 +9,8 @@
 </head>
 <body>
 
+<div class="page-wrap">
+
 <div class="card">
 
   <!-- Live Badge -->
@@ -34,8 +36,8 @@
     </div>
 
     <div class="artist-photo">
-      <!-- Swap the placeholder div for an <img> tag if you have an artist photo URL -->
-      <div class="artist-photo-placeholder">
+      <img id="artistImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;">
+      <div class="artist-photo-placeholder" id="artistPlaceholder">
         <div class="artist-initials" id="artistInitials">EW&amp;F</div>
         <div class="artist-photo-sub">Artist</div>
       </div>
@@ -121,6 +123,51 @@
   <div class="card-footer">Billboard &bull; Top 100 &bull; 1970 – 1979</div>
 
 </div>
+
+  <!-- ── BILLBOARD TOP 100 COUNTDOWN ── -->
+  <section class="countdown-section">
+
+    <div class="countdown-header">
+      <div class="countdown-title">
+        <span class="star">&#9733;</span>Billboard Top 100 Countdown<span class="star">&#9733;</span>
+      </div>
+      <div class="countdown-sub">Select a year to view the year-end top 20</div>
+    </div>
+
+    <div class="year-btns">
+      <button class="year-btn" data-year="1970">1970</button>
+      <button class="year-btn" data-year="1971">1971</button>
+      <button class="year-btn" data-year="1972">1972</button>
+      <button class="year-btn" data-year="1973">1973</button>
+      <button class="year-btn" data-year="1974">1974</button>
+      <button class="year-btn" data-year="1975">1975</button>
+      <button class="year-btn" data-year="1976">1976</button>
+      <button class="year-btn" data-year="1977">1977</button>
+      <button class="year-btn" data-year="1978">1978</button>
+      <button class="year-btn" data-year="1979">1979</button>
+    </div>
+
+    <div class="table-wrap" id="tableWrap">
+      <div class="table-year-bar">
+        <span class="table-year-num" id="tableYearNum"></span>
+        <span class="table-year-label">Billboard Year-End Hot 100</span>
+      </div>
+      <table class="countdown-table">
+        <thead>
+          <tr>
+            <th class="col-rank">#</th>
+            <th class="col-artist">Artist</th>
+            <th class="col-song">Song</th>
+            <th class="col-riaa">RIAA Certification</th>
+          </tr>
+        </thead>
+        <tbody id="countdownBody"></tbody>
+      </table>
+    </div>
+
+  </section>
+
+</div><!-- /.page-wrap -->
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
 <script src="70s.js"></script>

@@ -8,6 +8,7 @@ services:
       PORT: 3001
     volumes:
       - db_data:/app/data
+      - /home/iwilliams/ProjectNotes/billboard_1970_1999_notes/AlbumArt:/app/albumart:ro
     restart: unless-stopped
 
   web:
