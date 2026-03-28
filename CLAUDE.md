@@ -62,6 +62,33 @@ App is available at **http://localhost:3001**.
 
 A Claude Code GitHub Actions workflow is configured at `.github/workflows/claude.yml`. Tag `@claude` in any issue or PR comment to trigger it. The workflow uses `ANTHROPIC_API_KEY` stored as a repository secret.
 
+## Billboard data source
+
+The master chart data lives at:
+```
+~/ProjectNotes/billboard_1970_1999_notes/Billboard1970-1999_Remote.csv
+```
+Columns: `ChartPosition, Year, Artist, Song, RIAA Certification`. Covers 1970–1999 (100 songs × 30 years). When adding or updating chart data to any decade JS file, read from this CSV rather than hand-authoring entries.
+
+## Album art
+
+Local JPEG files live at:
+```
+~/ProjectNotes/billboard_1970_1999_notes/AlbumArt/<year>/
+```
+Mounted read-only into the node container at `/app/albumart`. Served via `GET /api/albumart?artist=<name>&year=<year>`.
+
+Filename conventions vary across folders (two styles coexist):
+- `Artist-Name_album-title.jpg` — hyphens in artist name, underscore before album
+- `Artist_Name-album-title.jpg` — underscores in artist name, hyphen before album
+
+Matching strategy in `index.js`:
+1. Strip connector words (`and`, `the`, `feat`, `with`, etc.) from both the query and filename
+2. Accumulate filename words until they equal the normalized artist name
+3. Decade-first search: year folders within the clicked song's decade are searched before other decades
+4. Fallback candidates: strip leading "The", then try the name before " and " (e.g. "Paul McCartney and Wings" → "Paul McCartney")
+5. 404 falls back silently to the initials placeholder in the player
+
 ## Feature status
 
 | Feature | Status | Notes |
@@ -69,7 +96,12 @@ A Claude Code GitHub Actions workflow is configured at `.github/workflows/claude
 | Live HLS stream playback | ✅ Done | hls.js (CDN) + Safari native fallback |
 | Era-styled player pages (70s, 80s, 90s) | ✅ Done | `public/70s.html`, `80s.html`, `90s.html` |
 | Animated waveform + media element spin | ✅ Done | All three player pages |
+| Mobile responsive layout | ✅ Done | All three decade pages; breakpoints at 480px, 360px, 320px |
+| Billboard Top 100 Countdown (70s) | ✅ Done | `70s.js` — year buttons 1970–1979, full 100-song table per year sourced from CSV; descending display (100→1) |
+| Billboard Top 100 Countdown (80s, 90s) | 🔲 Planned | Same pattern as 70s; data available in CSV |
+| Countdown row → player update (70s) | ✅ Done | Clicking any row updates player song/artist/year; selected row highlighted |
+| Album art display (70s) | ✅ Done | `GET /api/albumart` searches decade-first; fuzzy artist name matching; falls back to initials |
+| Album art display (80s, 90s) | 🔲 Planned | API already supports all decades; needs countdown + row-click added to 80s/90s pages |
 | Song rating (thumbs up / down) | ✅ UI done | Client-side only — no API or DB persistence yet |
 | Song lyrics display | 🔲 Planned | |
-| Album / title art display | 🔲 Planned | |
 | Rating persistence via API + DB | 🔲 Planned | UI hooks are in place; needs `/api/ratings` route and DB schema |

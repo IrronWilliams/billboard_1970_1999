@@ -707,3 +707,33 @@ input[type=range]::-moz-range-thumb {
   color: var(--dim);
   text-transform: uppercase;
 }
+
+/* ── RESPONSIVE ── */
+
+/* Reduce body padding on phones so card has more width */
+@media (max-width: 480px) {
+  body { padding: 12px; }
+
+  /* Larger touch target for volume slider thumb */
+  input[type=range]::-webkit-slider-thumb { width: 20px; height: 20px; }
+  input[type=range]::-moz-range-thumb     { width: 20px; height: 20px; }
+}
+
+/*
+ * Tighten card/media on small phones (≤360px).
+ * The cassette is 168px wide — shrink the artist photo to 104px so the
+ * total row (168 + 10 + 104 = 282px) fits the ~300px inner content area.
+ */
+@media (max-width: 360px) {
+  .card          { padding: 24px 18px 18px; }
+  .media-row     { gap: 10px; }
+  .artist-photo  { width: 104px; height: 104px; }
+
+  /* Allow quality values to wrap so they don't overflow narrow blocks */
+  .ql-value      { font-size: 0.5rem; white-space: normal; }
+}
+
+/* Stack cassette + artist photo vertically on very small screens (≤320px) */
+@media (max-width: 320px) {
+  .media-row { flex-direction: column; align-items: center; }
+}

@@ -634,3 +634,29 @@ input[type=range]::-moz-range-thumb {
   color: #162028;
   text-transform: uppercase;
 }
+
+/* ── RESPONSIVE ── */
+
+/* Reduce body padding on phones so card has more width */
+@media (max-width: 480px) {
+  body { padding: 12px; }
+
+  /* Larger touch target for volume slider thumb */
+  input[type=range]::-webkit-slider-thumb { width: 20px; height: 20px; }
+  input[type=range]::-moz-range-thumb     { width: 20px; height: 20px; }
+}
+
+/* Tighten card padding and media gap on small phones (≤360px) */
+@media (max-width: 360px) {
+  .card      { padding: 24px 18px 18px; }
+  .media-row { gap: 12px; }
+
+  /* Allow quality values to wrap so they don't overflow narrow blocks */
+  .ql-value  { font-size: 0.72rem; white-space: normal; }
+}
+
+/* Stack CD + artist photo vertically on very small screens (≤320px) */
+@media (max-width: 320px) {
+  .media-row { flex-direction: column; align-items: center; }
+  .cd        { width: 130px; height: 130px; }
+}
