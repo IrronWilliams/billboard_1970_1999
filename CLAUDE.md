@@ -79,6 +79,8 @@ Columns: `ChartPosition, Year, Artist, Song, RIAA Certification`. 2999 rows, yea
 ```
 Columns: `url, WeekID, Week Position, Song, Performer, SongID, Instance, Previous Week Position, Peak Position, Weeks on Chart, Year`. 156,495 rows of weekly Hot 100 entries 1970–1999. Mounted read-only at `/app/chartdata/Billboard1970-1999_Detail_Remote.csv`. Loaded into `PERF_INDEX` at startup.
 
+**Song sort order in `allSongs`**: sorted by `bestPosition` ascending, then `totalWeeks` descending as a tiebreaker. This ensures that when multiple songs share the same peak (e.g. Mariah Carey's 12 #1 singles), `highestSingle = allSongs[0]` returns the one with the longest chart run rather than an arbitrary CSV-order result.
+
 **Important — two name-mismatch issues handled in `index.js`:**
 
 1. **Artist names** differ between the two CSVs (e.g. `Daryl Hall and John Oates` in year-end vs `Daryl Hall John Oates` in weekly). `normPerf()` strips connector words (`and`, `the`, `feat`, etc.) from both sides before matching.

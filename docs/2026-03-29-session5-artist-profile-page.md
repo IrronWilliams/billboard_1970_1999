@@ -61,6 +61,17 @@ The initial format `Peak #80 · August 1987 – September 1987` was misleading �
 
 The "Years on Chart" stat card originally showed a range like `1983–1996`. Updated to show each year as an individual chip (e.g. `1983 1984 1987 1988 1989 1992 1993 1994 1995 1996`) so gaps in an artist's chart history are visible at a glance.
 
+### Highest Charting Single — tiebreaker sort and tied-songs display
+
+When multiple songs share the same peak position (e.g. Mariah Carey has 12 #1 singles), the original `sort()` by `bestPosition` left tied entries in CSV insertion order, making the selection arbitrary. Two changes were made:
+
+1. **Sort tiebreaker** (`index.js`): `allSongs` is now sorted by `bestPosition` ascending then `totalWeeks` descending. `highestSingle = allSongs[0]` therefore always returns the song with the longest chart run among those sharing the top peak.
+
+2. **Card meta text** (`artist.html`): when `allSongs` contains more than one song at the same peak, the Highest Charting Single card shows:
+   `Peak #1 · Longest run among 12 #1 singles · Single spent 32 weeks on the charts`
+   When there is no tie, the existing date-range format is preserved:
+   `Peak #1 · August 1988 – January 1989`
+
 ## Files changed
 
 | File | Change |

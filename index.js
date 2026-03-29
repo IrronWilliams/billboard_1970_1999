@@ -208,7 +208,11 @@ app.get('/api/artist-stats', (req, res) => {
     });
   });
 
-  songs.sort((a, b) => a.bestPosition - b.bestPosition);
+  // Primary: best peak position (ascending). Secondary: most weeks on chart
+  // (descending) so that when multiple songs share the same peak — e.g.
+  // Mariah Carey's 12 #1 singles — the longest-running one is listed first
+  // and selected as highestSingle rather than whichever CSV row was processed first.
+  songs.sort((a, b) => a.bestPosition - b.bestPosition || b.totalWeeks - a.totalWeeks);
 
   const totalSingles  = songs.length;
   const top10         = songs.filter(s => s.bestPosition <= 10).length;
