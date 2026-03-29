@@ -806,6 +806,19 @@ input[type=range]::-moz-range-thumb {
 .td-artist { font-weight: 600; white-space: nowrap; color: var(--teal); }
 .td-song   { font-style: italic; }
 .td-riaa   { text-align: center; }
+a.profile-link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+  color: var(--teal);
+  opacity: .3;
+  text-decoration: none;
+  font-size: 11px;
+  vertical-align: middle;
+  transition: opacity .15s;
+}
+a.profile-link:hover { opacity: 1; }
+tr:hover a.profile-link { opacity: .6; }
 
 .riaa-badge {
   display: inline-block;
