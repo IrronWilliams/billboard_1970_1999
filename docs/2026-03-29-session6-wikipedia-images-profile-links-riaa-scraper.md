@@ -70,23 +70,51 @@ A one-time Node.js data extraction script was created at:
 - Saves progress to `riaa_certified_units.json` every 25 entries (re-run safe)
 - Output: `{ "ARTIST|||SONG": { certLevel, certUnits, awardId } | null }`
 
-**Status:** Script is written and tested on a sample of 6 songs. Full run (~60–70 min) not yet executed. CSV and decade JS update pending completion of the scrape.
+**Final results:** 2,934 songs processed — 904 certified, 2,030 not found. Output written to `riaa_certified_units.json`.
+
+### 4. RIAA data applied to decade JS files
+
+A second script `apply_riaa.js` was written to apply the scraped data to the three decade JS files.
+
+**Matching strategy:**
+- Constructs `ARTIST|||SONG` key from each JS entry and looks it up directly in the JSON
+- Normalized fallback (lowercase, strip non-alphanumeric) for any edge cases where strings differ
+
+**Format applied:**
+| JSON certLevel | JS riaa value |
+|---|---|
+| `Gold` | `Gold` |
+| `1x Platinum` | `Platinum` |
+| `Nx Platinum` | `N× Platinum` |
+| `Diamond` | `Diamond` |
+
+**Rule:** Only entries with a non-null JSON result are updated. Songs returning null (not found on RIAA) keep their existing value — this avoids overwriting manually-entered data with a blank.
+
+**Results:** 549 entries updated — `70s.js` (300), `80s.js` (119), `90s.js` (130).
+
+Notable updates:
+- Madonna "Vogue": `Multi-Platinum` → `3× Platinum`
+- Whitney Houston "I Will Always Love You": `Platinum` → `11× Platinum`
+- Michael Jackson "Billie Jean": `Platinum` → `Diamond`
+- Michael Jackson "Beat It": updated to `8× Platinum`
+- Michael Jackson "Thriller": updated to `Diamond`
+- Don McLean "American Pie": updated to `6× Platinum`
+- Three Dog Night "Joy to the World": `Gold` → `2× Platinum`
 
 ## Files changed
 
 | File | Change |
 |---|---|
-| `public/70s.js` | Added `WIKI_MUSIC_RE` constant and `fetchWikiThumb()` function; updated `testImg.onerror` to call it; split artist link into `artistUrl` and added `songUrl` on song cell; updated tooltips |
-| `public/80s.js` | Same as 70s.js |
-| `public/90s.js` | Same as 70s.js |
-| `public/artist.html` | Added `probe.onerror` handler that calls `fetchWiki()` and applies `thumbnail.source` to hero image and background |
-| `CLAUDE.md` | Added Wikipedia image fallback docs, profile links section, RIAA scraper section; updated feature status table |
-| `~/ProjectNotes/.../scrape_riaa.js` | New one-time data extraction script (outside repo) |
+| `public/70s.js` | Added `WIKI_MUSIC_RE` + `fetchWikiThumb()`; updated `testImg.onerror`; split profile links; 300 RIAA values updated |
+| `public/80s.js` | Same as 70s.js; 119 RIAA values updated |
+| `public/90s.js` | Same as 70s.js; 130 RIAA values updated |
+| `public/artist.html` | Added `probe.onerror` handler calling `fetchWiki()` for hero image fallback |
+| `CLAUDE.md` | Added Wikipedia fallback docs, profile links section, RIAA scraper section; updated feature status |
+| `~/ProjectNotes/.../scrape_riaa.js` | One-time scraper — produces `riaa_certified_units.json` |
+| `~/ProjectNotes/.../apply_riaa.js` | One-time applier — updates decade JS files from JSON output |
 
 ## What is not yet done
 
-- **RIAA scraper full run** — script is ready, ~60–70 min to complete; `riaa_certified_units.json` not yet produced
-- **RIAA data applied to CSV and JS files** — pending scraper output
 - **Rating persistence** — thumbs up/down UI exists on all three decade pages but votes are not saved to the database
 - **Song lyrics display** — planned, no implementation started
 - **`/api/ratings` route and DB schema** — UI hooks are in place
