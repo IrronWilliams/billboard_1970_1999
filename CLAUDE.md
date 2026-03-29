@@ -29,6 +29,7 @@ public/          Static files baked into nginx at build time (HTML, CSS, JS, ima
   90s.html       Era-styled player — 1990s (CD disc, teal/charcoal)
   90s.css        Styles for 90s player
   90s.js         JavaScript for 90s player
+  artist.html    Artist profile page — biography, Billboard stats, song stats, chart history
 docs/            Decision logs — one Markdown file per session, named YYYY-MM-DD-*.md
 index.js         Express entry point — add all API routes here
 db.js            Exports a single shared better-sqlite3 connection (WAL mode, foreign keys on)
@@ -62,13 +63,29 @@ App is available at **http://localhost:3001**.
 
 A Claude Code GitHub Actions workflow is configured at `.github/workflows/claude.yml`. Tag `@claude` in any issue or PR comment to trigger it. The workflow uses `ANTHROPIC_API_KEY` stored as a repository secret.
 
-## Billboard data source
+## Billboard data sources
 
-The master chart data lives at:
+Two CSV files exist; use the right one for the right purpose:
+
+**Year-end chart data** (for decade JS files — `70s.js`, `80s.js`, `90s.js`):
 ```
 ~/ProjectNotes/billboard_1970_1999_notes/Billboard1970-1999_Remote.csv
 ```
-Columns: `ChartPosition, Year, Artist, Song, RIAA Certification`. Covers 1970–1999 (100 songs × 30 years). When adding or updating chart data to any decade JS file, read from this CSV rather than hand-authoring entries.
+Columns: `ChartPosition, Year, Artist, Song, RIAA Certification`. 2999 rows, year-end Hot 100 rankings. When adding or updating chart data to any decade JS file, read from this CSV.
+
+**Weekly chart data** (for `GET /api/artist-stats` and `GET /api/song-stats`):
+```
+~/ProjectNotes/billboard_1970_1999_notes/Billboard1970-1999_Detail_Remote.csv
+```
+Columns: `url, WeekID, Week Position, Song, Performer, SongID, Instance, Previous Week Position, Peak Position, Weeks on Chart, Year`. 156,495 rows of weekly Hot 100 entries 1970–1999. Mounted read-only at `/app/chartdata/Billboard1970-1999_Detail_Remote.csv`. Loaded into `PERF_INDEX` at startup.
+
+**Important — two name-mismatch issues handled in `index.js`:**
+
+1. **Artist names** differ between the two CSVs (e.g. `Daryl Hall and John Oates` in year-end vs `Daryl Hall John Oates` in weekly). `normPerf()` strips connector words (`and`, `the`, `feat`, etc.) from both sides before matching.
+
+2. **Song titles** in the weekly CSV sometimes include subtitles not present in the year-end CSV (e.g. `Two Steps Behind (From "Last Action Hero")`). `normSong()` strips trailing parenthetical expressions (`\s*\([^)]*\)\s*$`) before normalizing so `"Two Steps Behind"` matches the full stored title. The same `normTitle()` function is mirrored client-side in `artist.html` for song comparisons.
+
+**Wikipedia biography** (`artist.html`): fetched via `https://en.wikipedia.org/api/rest_v1/page/summary/{name}`. If the bare artist name returns a non-music article (e.g. "Prince" returns royalty), the `fetchWiki()` function retries automatically with `(musician)`, `(singer)`, `(band)`, `(rapper)` suffixes in order.
 
 ## Album art
 
@@ -102,6 +119,7 @@ Matching strategy in `index.js`:
 | Billboard Top 100 Countdown (90s) | ✅ Done | `90s.js` — year buttons 1990–1999, full 100-song table per year; descending display (100→1) |
 | Countdown row → player update (all decades) | ✅ Done | Clicking any row updates player song/artist/year/initials; selected row highlighted |
 | Album art display (all decades) | ✅ Done | `GET /api/albumart` searches decade-first; fuzzy artist name matching; falls back to initials |
+| Artist profile page | ✅ Done | `public/artist.html` — biography (Wikipedia), Billboard stats, song stats, chart history; linked via ↗ icon in all countdown tables |
 | Song rating (thumbs up / down) | ✅ UI done | Client-side only — no API or DB persistence yet |
 | Song lyrics display | 🔲 Planned | |
 | Rating persistence via API + DB | 🔲 Planned | UI hooks are in place; needs `/api/ratings` route and DB schema |

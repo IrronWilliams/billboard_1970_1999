@@ -805,6 +805,21 @@ input[type=range]::-moz-range-thumb {
   white-space: nowrap;
 }
 
+/* Profile link (↗ icon inside artist cell) */
+a.profile-link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+  color: var(--gold-lt);
+  opacity: .35;
+  text-decoration: none;
+  font-size: 11px;
+  vertical-align: middle;
+  transition: opacity .15s;
+}
+a.profile-link:hover { opacity: 1; }
+tr:hover a.profile-link { opacity: .6; }
+
 /* Song column */
 .td-song { font-style: italic; }
 

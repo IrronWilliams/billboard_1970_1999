@@ -9,6 +9,7 @@ services:
     volumes:
       - db_data:/app/data
       - /home/iwilliams/ProjectNotes/billboard_1970_1999_notes/AlbumArt:/app/albumart:ro
+      - /home/iwilliams/ProjectNotes/billboard_1970_1999_notes/Billboard1970-1999_Detail_Remote.csv:/app/chartdata/Billboard1970-1999_Detail_Remote.csv:ro
     restart: unless-stopped
 
   web:

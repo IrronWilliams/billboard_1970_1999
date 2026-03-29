@@ -1241,9 +1241,10 @@ function renderCountdown(year) {
       : `<span class="riaa-none">—</span>`;
     const safeArtist = artist.replace(/'/g, '&#39;');
     const safeSong   = song.replace(/'/g, '&#39;');
+    const profileUrl = `artist.html?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}&year=${year}`;
     return `<tr data-artist="${safeArtist}" data-song="${safeSong}" data-year="${year}">
       <td class="col-rank"><span class="rank-badge ${rankClass}">${pos}</span></td>
-      <td class="td-artist">${artist}</td>
+      <td class="td-artist">${artist} <a href="${profileUrl}" class="profile-link" title="View artist profile">&#8599;</a></td>
       <td class="td-song">${song}</td>
       <td class="td-riaa">${riaaCell}</td>
     </tr>`;
@@ -1255,6 +1256,7 @@ function renderCountdown(year) {
 
 // Row click — update player with selected song
 countdownBody.addEventListener('click', e => {
+  if (e.target.closest('a.profile-link')) return;
   const row = e.target.closest('tr[data-artist]');
   if (!row) return;
   countdownBody.querySelectorAll('tr.row-selected').forEach(r => r.classList.remove('row-selected'));
