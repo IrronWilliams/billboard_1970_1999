@@ -1222,7 +1222,11 @@ async function fetchItunesPreview(artist, song) {
     const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist + ' ' + song)}&media=music&entity=song&limit=5`);
     const data = await res.json();
     const hit  = data.results.find(r => r.previewUrl);
-    return hit ? hit.previewUrl : null;
+    if (!hit) return null;
+    const artworkUrl = hit.artworkUrl100
+      ? hit.artworkUrl100.replace('100x100bb', '600x600bb')
+      : null;
+    return { previewUrl: hit.previewUrl, artworkUrl };
   } catch { return null; }
 }
 
@@ -1298,6 +1302,30 @@ function getInitials(name) {
     .join('');
 }
 
+function loadArtistImage(itunesArtwork, artist, year) {
+  function showImg(src) {
+    artistImgEl.src = src;
+    artistImgEl.alt = artist;
+    artistImgEl.style.display = 'block';
+    artistPlaceholderEl.style.display = 'none';
+  }
+  function tryLocalThenWiki() {
+    const url = `/api/albumart?artist=${encodeURIComponent(artist)}&year=${encodeURIComponent(year)}`;
+    const img = new Image();
+    img.onload = () => showImg(url);
+    img.onerror = () => fetchWikiThumb(artist).then(t => t ? showImg(t) : (artistImgEl.style.display = 'none', artistPlaceholderEl.style.display = ''));
+    img.src = url;
+  }
+  if (itunesArtwork) {
+    const img = new Image();
+    img.onload = () => showImg(itunesArtwork);
+    img.onerror = () => tryLocalThenWiki();
+    img.src = itunesArtwork;
+  } else {
+    tryLocalThenWiki();
+  }
+}
+
 async function updatePlayer(artist, song, year) {
   songTitleEl.textContent      = song;
   artistNameEl.textContent     = artist;
@@ -1307,39 +1335,18 @@ async function updatePlayer(artist, song, year) {
   videoBtnEl.style.display = 'none';
   currentVideoUrl = null;
 
-  const url = `/api/albumart?artist=${encodeURIComponent(artist)}&year=${encodeURIComponent(year)}`;
-  const testImg = new Image();
-  testImg.onload = () => {
-    artistImgEl.src = url;
-    artistImgEl.alt = artist;
-    artistImgEl.style.display = 'block';
-    artistPlaceholderEl.style.display = 'none';
-  };
-  testImg.onerror = () => {
-    fetchWikiThumb(artist).then(thumbUrl => {
-      if (thumbUrl) {
-        artistImgEl.src = thumbUrl;
-        artistImgEl.alt = artist;
-        artistImgEl.style.display = 'block';
-        artistPlaceholderEl.style.display = 'none';
-      } else {
-        artistImgEl.style.display = 'none';
-        artistPlaceholderEl.style.display = '';
-      }
-    });
-  };
-  testImg.src = url;
-
   document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   setStatus('Finding preview\u2026');
-  const [previewUrl, videoUrl] = await Promise.all([
+  const [itunesResult, videoUrl] = await Promise.all([
     fetchItunesPreview(artist, song),
     fetchItunesVideo(artist, song)
   ]);
 
-  if (previewUrl) {
-    switchToPreview(previewUrl);
+  loadArtistImage(itunesResult ? itunesResult.artworkUrl : null, artist, year);
+
+  if (itunesResult && itunesResult.previewUrl) {
+    switchToPreview(itunesResult.previewUrl);
   } else {
     setStatus('Preview not available');
   }

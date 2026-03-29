@@ -107,9 +107,15 @@ Matching strategy in `index.js`:
 2. Accumulate filename words until they equal the normalized artist name
 3. Decade-first search: year folders within the clicked song's decade are searched before other decades
 4. Fallback candidates: strip leading "The", then try the name before " and " (e.g. "Paul McCartney and Wings" → "Paul McCartney")
-5. On 404, client-side `fetchWikiThumb()` queries the Wikipedia summary API for a thumbnail image before falling back to the initials placeholder
+5. On 404, client-side fallback chain continues (see below)
 
-**Wikipedia image fallback** (`70s.js`, `80s.js`, `90s.js`, `artist.html`): when `GET /api/albumart` returns 404, `fetchWikiThumb(artist)` is called. It uses the same music-keyword guard and suffix chain as `fetchWiki()` (`(musician)`, `(singer)`, `(band)`, `(rapper)`), but returns only the `thumbnail.source` URL. Applied in the `testImg.onerror` / `probe.onerror` handler on all four pages.
+**Artist image fallback chain** (`70s.js`, `80s.js`, `90s.js`) — `loadArtistImage()` tries sources in order:
+1. **iTunes artwork** — `artworkUrl100` from the `fetchItunesPreview` result, scaled to 600×600 by replacing `100x100bb` with `600x600bb` in the URL. No extra API call — comes free with the audio preview fetch.
+2. **Local album art** — `GET /api/albumart` (local JPEGs, see matching strategy above)
+3. **Wikipedia thumbnail** — `fetchWikiThumb(artist)` queries the Wikipedia summary API using the same music-keyword guard and suffix chain as `fetchWiki()` (`(musician)`, `(singer)`, `(band)`, `(rapper)`), returning only `thumbnail.source`
+4. **Initials placeholder** — shown if all three image sources fail
+
+`artist.html` still uses the original two-step chain: local album art → Wikipedia thumbnail → initials placeholder.
 
 ## Artist and song profile links
 
@@ -128,7 +134,7 @@ The artist link omits the song param so `artist.html` loads focused on the artis
 
 Implemented identically in `70s.js`, `80s.js`, and `90s.js`. No API key required — all calls go directly from the browser to Apple's public iTunes Search API.
 
-**Audio preview**: when a countdown row is clicked, `fetchItunesPreview(artist, song)` fetches a 30-sec AAC clip. On success, the HLS stream is detached (`hls.detachMedia()`) and `audio.src` is switched to the iTunes preview URL, which auto-plays.
+**Audio preview**: when a countdown row is clicked, `fetchItunesPreview(artist, song)` fetches a 30-sec AAC clip. On success, the HLS stream is detached (`hls.detachMedia()`) and `audio.src` is switched to the iTunes preview URL, which auto-plays. The function returns `{ previewUrl, artworkUrl }` — the artwork URL (scaled to 600×600) is passed to `loadArtistImage()` as the first image source to try.
 
 **Video preview**: `fetchItunesVideo(artist, song)` uses a three-stage search to find a 30-sec MP4 clip:
 1. Artist-only search (`limit=25`) — find a result whose `trackName` matches the song
