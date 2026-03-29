@@ -13,7 +13,8 @@ An online radio station website for Billboard's Top 100 songs from 1970–1999. 
 | Reverse proxy / static files | nginx (Alpine Docker image) |
 | API server | Express.js on Node 20 (Docker) |
 | Database | SQLite via `better-sqlite3` |
-| Audio streaming | HLS via hls.js (CDN) |
+| Audio streaming | HLS via hls.js (CDN); iTunes 30-sec preview on song select (80s) |
+| Music video preview | iTunes Search API — 30-sec MP4 clip in modal (80s) |
 
 ## Folder structure
 
@@ -123,6 +124,25 @@ Both use `class="profile-link"`. The row click handler guards against both: `if 
 
 The artist link omits the song param so `artist.html` loads focused on the artist overview. The song link passes all params so the Selected Song panel pre-populates.
 
+## iTunes preview integration (all decade players)
+
+Implemented identically in `70s.js`, `80s.js`, and `90s.js`. No API key required — all calls go directly from the browser to Apple's public iTunes Search API.
+
+**Audio preview**: when a countdown row is clicked, `fetchItunesPreview(artist, song)` fetches a 30-sec AAC clip. On success, the HLS stream is detached (`hls.detachMedia()`) and `audio.src` is switched to the iTunes preview URL, which auto-plays.
+
+**Video preview**: `fetchItunesVideo(artist, song)` uses a three-stage search to find a 30-sec MP4 clip:
+1. Artist-only search (`limit=25`) — find a result whose `trackName` matches the song
+2. Combined `artist + song` search — validate both song title AND artist name match
+3. Song-only search (`limit=15`) — validate the returned artist name overlaps with ours
+
+If a video is found, a `▶ Video` button appears below the play/pause button. Clicking it pauses the audio and opens the video in a modal overlay. Closing the modal resumes the audio.
+
+**Normalization** (`norm()` in `fetchItunesVideo`): lowercases, strips accents via `normalize('NFD')` (handles e.g. "Exposé" → "expose"), removes apostrophes, and collapses non-alphanumeric characters to spaces. Applied to both sides of every artist/song comparison.
+
+**Player reset**: clicking a year button calls `resetPlayer()`, which stops audio, detaches HLS, clears all player fields, hides the video button, and sets status to "Click a song to preview".
+
+**Known limitations**: 30-second previews only; music video catalog coverage varies — some artists/songs have no video on iTunes.
+
 ## RIAA certified units scraper
 
 Two one-time data scripts live at `~/ProjectNotes/billboard_1970_1999_notes/`:
@@ -157,6 +177,9 @@ Two one-time data scripts live at `~/ProjectNotes/billboard_1970_1999_notes/`:
 | Artist profile link (artist cell) | ✅ Done | Opens `artist.html?artist=NAME` — artist overview, no pre-selected song |
 | Song profile link (song cell) | ✅ Done | Opens `artist.html?artist=NAME&song=SONG&year=YEAR` — pre-populates Selected Song panel |
 | RIAA certified units data | ✅ Done | 904/2,923 songs certified; 549 JS entries updated via `apply_riaa.js`; data in `riaa_certified_units.json` |
+| iTunes audio preview (all decades) | ✅ Done | `70s.js`, `80s.js`, `90s.js` — row click fetches 30-sec AAC via iTunes Search API; HLS detached on select; auto-plays |
+| iTunes video preview modal (all decades) | ✅ Done | `▶ Video` button appears when iTunes has a video clip; opens 30-sec MP4 in modal; audio pauses while modal is open; modal themed per era |
+| Player reset on year change (all decades) | ✅ Done | `resetPlayer()` clears all fields and stops audio when a year button is clicked |
 | Song rating (thumbs up / down) | ✅ UI done | Client-side only — no API or DB persistence yet |
 | Song lyrics display | 🔲 Planned | |
 | Rating persistence via API + DB | 🔲 Planned | UI hooks are in place; needs `/api/ratings` route and DB schema |
