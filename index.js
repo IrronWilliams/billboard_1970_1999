@@ -100,6 +100,71 @@ try {
   console.warn('Weekly chart data unavailable:', e.message);
 }
 
+// ── Abbreviation alias detection ─────────────────────────────────────────────
+// Detects artist name variants where one form uses per-word initials in place of
+// a full band-name suffix, e.g. "Prince And The N.P.G." ↔
+// "Prince And The New Power Generation".
+//
+// Algorithm: for pairs sharing the same first token, find the common prefix
+// of their token arrays, then check whether the diverging suffix of one entry
+// consists of single-letter tokens that are initials of the other's suffix words.
+
+function tokensForAlias(rawName) {
+  return rawName.toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ').trim()
+    .split(/\s+/).filter(w => w && !CONN.has(w));
+}
+
+function couldBeInitials(short, long) {
+  if (short.length !== long.length) return false;
+  return short.every((t, i) => t.length === 1 && long[i].startsWith(t));
+}
+
+const ALIAS_MAP = new Map(); // normKey → Set<normKey>
+
+(function buildAliasMap() {
+  const entries = [];
+  PERF_INDEX.forEach((pe, key) => entries.push({ key, tokens: tokensForAlias(pe.rawName) }));
+
+  // Group by first token so we only compare entries that share a leading word
+  const byFirst = new Map();
+  for (const e of entries) {
+    const f = e.tokens[0] || '';
+    if (!byFirst.has(f)) byFirst.set(f, []);
+    byFirst.get(f).push(e);
+  }
+
+  byFirst.forEach(group => {
+    for (let i = 0; i < group.length; i++) {
+      for (let j = i + 1; j < group.length; j++) {
+        const { key: ki, tokens: ti } = group[i];
+        const { key: kj, tokens: tj } = group[j];
+        if (ti.length !== tj.length) continue;
+        let pfx = 0;
+        while (pfx < ti.length && ti[pfx] === tj[pfx]) pfx++;
+        if (pfx === 0) continue;
+        const ri = ti.slice(pfx);
+        const rj = tj.slice(pfx);
+        // Require at least 2 suffix tokens to avoid single-letter false positives
+        // (e.g. "Timmy T." and "Timmy Thomas" are different people, not an alias)
+        if (ri.length < 2) continue;
+        if (couldBeInitials(ri, rj) || couldBeInitials(rj, ri)) {
+          if (!ALIAS_MAP.has(ki)) ALIAS_MAP.set(ki, new Set([ki]));
+          if (!ALIAS_MAP.has(kj)) ALIAS_MAP.set(kj, new Set([kj]));
+          ALIAS_MAP.get(ki).add(kj);
+          ALIAS_MAP.get(kj).add(ki);
+          console.log(`Artist alias: "${PERF_INDEX.get(ki).rawName}" ↔ "${PERF_INDEX.get(kj).rawName}"`);
+        }
+      }
+    }
+  });
+})();
+
+function getAliasedEntries(np) {
+  const keys = ALIAS_MAP.has(np) ? [...ALIAS_MAP.get(np)] : [np];
+  return keys.map(k => PERF_INDEX.get(k)).filter(Boolean);
+}
+
 // ── Express ──────────────────────────────────────────────────────────────────
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -184,12 +249,22 @@ app.get('/api/artist-stats', (req, res) => {
   const { artist } = req.query;
   if (!artist) return res.status(400).json({ error: 'artist required' });
 
-  const np = normPerf(artist);
-  const pe = PERF_INDEX.get(np);
-  if (!pe) return res.json({ found: false, artist });
+  const np      = normPerf(artist);
+  const entries = getAliasedEntries(np);
+  if (entries.length === 0) return res.json({ found: false, artist });
 
+  // Merge songs from all aliased entries by normalized song title to avoid duplicates
+  const songMap = new Map();
+  for (const pe of entries) {
+    pe.songs.forEach(({ rawSong, rows }, ns) => {
+      if (!songMap.has(ns)) songMap.set(ns, { rawSong, rows: [] });
+      songMap.get(ns).rows.push(...rows);
+    });
+  }
+
+  const primaryEntry = PERF_INDEX.get(np) || entries[0];
   const songs = [];
-  pe.songs.forEach(({ rawSong, rows }) => {
+  songMap.forEach(({ rawSong, rows }) => {
     const bestPos    = Math.min(...rows.map(r => r.weekPos));
     const totalWeeks = rows.length;
     const years      = [...new Set(rows.map(r => r.year))].sort();
@@ -226,7 +301,7 @@ app.get('/api/artist-stats', (req, res) => {
 
   res.json({
     found: true,
-    artist: pe.rawName,
+    artist: primaryEntry.rawName,
     totalSingles, top10, top5, top1,
     highestSingle, lowestSingle, longestRunning,
     firstYear: allYears[0],
@@ -241,12 +316,16 @@ app.get('/api/song-stats', (req, res) => {
   const { artist, song } = req.query;
   if (!artist || !song) return res.status(400).json({ error: 'artist and song required' });
 
-  const np = normPerf(artist);
-  const ns = normSong(song);
-  const pe = PERF_INDEX.get(np);
-  if (!pe) return res.json({ found: false });
+  const np      = normPerf(artist);
+  const ns      = normSong(song);
+  const entries = getAliasedEntries(np);
+  if (entries.length === 0) return res.json({ found: false });
 
-  const se = pe.songs.get(ns);
+  let se = null;
+  let matchedEntry = null;
+  for (const pe of entries) {
+    if (pe.songs.has(ns)) { se = pe.songs.get(ns); matchedEntry = pe; break; }
+  }
   if (!se) return res.json({ found: false });
 
   const { rawSong, rows } = se;
@@ -258,7 +337,7 @@ app.get('/api/song-stats', (req, res) => {
 
   res.json({
     found:       true,
-    artist:      pe.rawName,
+    artist:      matchedEntry.rawName,
     song:        rawSong,
     peakPosition: peakPos,
     totalWeeks,
