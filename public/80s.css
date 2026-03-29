@@ -25,10 +25,22 @@ body {
     linear-gradient(90deg, rgba(255,26,117,0.04) 1px, transparent 1px);
   background-size: 100% 100%, 100% 100%, 46px 46px, 46px 46px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   padding: 24px;
   font-family: 'Exo 2', sans-serif;
+}
+
+.page-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 40px;
 }
 
 /* CRT scanline overlay */
@@ -707,6 +719,178 @@ input[type=range]::-moz-range-thumb {
   color: var(--dim);
   text-transform: uppercase;
 }
+
+/* ── COUNTDOWN SECTION ── */
+.countdown-section {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--neon-pink);
+  border-radius: 8px;
+  padding: 28px 24px 32px;
+  box-shadow:
+    0 0 0 1px rgba(255,26,117,0.2),
+    0 0 22px rgba(255,26,117,0.15),
+    0 8px 32px rgba(0,0,0,0.6);
+}
+
+.countdown-header { text-align: center; margin-bottom: 22px; }
+
+.countdown-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 12px rgba(0,229,255,0.6);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.countdown-title .star { color: var(--neon-pink); margin: 0 8px; }
+
+.countdown-sub {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.year-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.year-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 7px 14px;
+  border: 1px solid var(--neon-pink);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--neon-pink);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+
+.year-btn:hover {
+  background: rgba(255,26,117,0.12);
+  box-shadow: 0 0 10px rgba(255,26,117,0.4);
+  transform: translateY(-2px);
+}
+
+.year-btn:active { transform: translateY(0); }
+
+.year-btn.active {
+  background: var(--neon-pink);
+  color: #07001a;
+  box-shadow: 0 0 16px rgba(255,26,117,0.6);
+}
+
+.table-wrap { display: none; }
+.table-wrap.visible { display: block; }
+
+.table-year-bar {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,26,117,0.3);
+}
+
+.table-year-num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--neon-pink);
+  text-shadow: 0 0 16px rgba(255,26,117,0.7);
+}
+
+.table-year-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.countdown-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.countdown-table thead th {
+  padding: 8px 16px;
+  text-align: left;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(0,229,255,0.3);
+}
+
+.countdown-table thead th.col-rank { text-align: center; width: 52px; }
+.countdown-table thead th.col-riaa { text-align: center; }
+
+.countdown-table tbody tr {
+  border-bottom: 1px solid rgba(255,26,117,0.12);
+  transition: background 0.12s;
+  cursor: pointer;
+}
+
+.countdown-table tbody tr:nth-child(even) { background: rgba(0,0,0,0.15); }
+.countdown-table tbody tr:hover           { background: rgba(255,26,117,0.08); }
+.countdown-table tbody tr:last-child      { border-bottom: none; }
+.countdown-table tbody tr.row-selected    { background: rgba(255,26,117,0.18) !important; outline: 1px solid rgba(255,26,117,0.5); }
+
+.countdown-table tbody td {
+  padding: 10px 16px;
+  vertical-align: middle;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.countdown-table tbody td.col-rank { text-align: center; width: 52px; }
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.rank-1    { background: var(--neon-pink);   color: #07001a; box-shadow: 0 0 10px rgba(255,26,117,0.7); }
+.rank-2    { background: var(--neon-cyan);   color: #07001a; box-shadow: 0 0 8px rgba(0,229,255,0.5); }
+.rank-3    { background: var(--neon-purple); color: #fff;    box-shadow: 0 0 8px rgba(153,0,238,0.5); }
+.rank-other { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,26,117,0.2); }
+
+.td-artist { font-weight: 600; white-space: nowrap; color: var(--neon-cyan); }
+.td-song   { font-style: italic; }
+.td-riaa   { text-align: center; }
+
+.riaa-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--neon-pink);
+  border-radius: 3px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: var(--neon-pink);
+  text-transform: uppercase;
+}
+
+.riaa-none { color: var(--muted); font-size: 0.8rem; }
 
 /* ── RESPONSIVE ── */
 
