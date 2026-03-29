@@ -420,51 +420,6 @@ body::after {
   color: var(--muted);
 }
 
-/* ── QUALITY PANEL ── */
-.quality-panel {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  background: #05001a;
-  border: 1px solid #2a0060;
-  border-radius: 4px;
-  margin-bottom: 14px;
-  overflow: hidden;
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
-}
-
-.ql-block {
-  flex: 1;
-  padding: 5px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ql-label {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.44rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: rgba(0,229,255,0.45);
-  text-transform: uppercase;
-}
-
-.ql-value {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.6rem;
-  color: var(--neon-cyan);
-  letter-spacing: 0.05em;
-  text-shadow: 0 0 6px rgba(0,229,255,0.4);
-  white-space: nowrap;
-}
-
-.ql-sep {
-  width: 1px;
-  background: #1a0050;
-  flex-shrink: 0;
-  margin: 6px 0;
-}
 
 /* ── DIVIDER ── */
 .divider {
@@ -926,11 +881,81 @@ tr:hover a.profile-link { opacity: .6; }
   .media-row     { gap: 10px; }
   .artist-photo  { width: 104px; height: 104px; }
 
-  /* Allow quality values to wrap so they don't overflow narrow blocks */
-  .ql-value      { font-size: 0.5rem; white-space: normal; }
+
 }
 
 /* Stack cassette + artist photo vertically on very small screens (≤320px) */
 @media (max-width: 320px) {
   .media-row { flex-direction: column; align-items: center; }
+}
+
+/* ── VIDEO BUTTON ── */
+.video-btn-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+}
+.video-btn {
+  background: transparent;
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  padding: 5px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.video-btn:hover {
+  background: var(--neon-cyan);
+  color: var(--bg);
+  box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* ── VIDEO MODAL ── */
+.video-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+.video-modal.open { display: flex; }
+.video-modal-inner {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--neon-pink);
+  border-radius: 8px;
+  padding: 20px 20px 16px;
+  max-width: 620px;
+  width: 92vw;
+  box-shadow: 0 0 30px rgba(255, 26, 117, 0.3);
+}
+.video-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  color: var(--neon-pink);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.video-modal-close:hover { color: #fff; }
+.video-modal-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.video-modal-inner video {
+  width: 100%;
+  border-radius: 4px;
+  display: block;
 }

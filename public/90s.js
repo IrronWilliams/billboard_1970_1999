@@ -1,6 +1,7 @@
 const STREAM = 'https://d3d4yli4hf5bmh.cloudfront.net/hls/live.m3u8';
 
 const audio     = new Audio();
+let   hls       = null;
 const record    = document.getElementById('record');
 const waveform  = document.getElementById('waveform');
 const playBtn   = document.getElementById('playBtn');
@@ -13,8 +14,10 @@ const thumbDown = document.getElementById('thumbDown');
 const upCount   = document.getElementById('upCount');
 const downCount = document.getElementById('downCount');
 
-let isPlaying = false;
-let hlsReady  = false;
+let isPlaying      = false;
+let hlsReady       = false;
+let isPreviewMode  = false;
+let currentVideoUrl = null;
 let upVotes   = 0;
 let downVotes = 0;
 let userVote  = null; // 'up' | 'down' | null
@@ -22,7 +25,7 @@ let userVote  = null; // 'up' | 'down' | null
 // ── HLS INIT ──
 (function initHls() {
   if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-    const hls = new Hls({ enableWorker: true });
+    hls = new Hls({ enableWorker: true });
     hls.loadSource(STREAM);
     hls.attachMedia(audio);
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -43,7 +46,7 @@ let userVote  = null; // 'up' | 'down' | null
 
 // ── PLAY / PAUSE ──
 playBtn.addEventListener('click', () => {
-  if (!hlsReady) { setStatus('Buffering stream...'); return; }
+  if (!hlsReady && !isPreviewMode) { setStatus('Buffering stream...'); return; }
   if (isPlaying) {
     audio.pause();
     setPlayState(false);
@@ -61,7 +64,7 @@ function setPlayState(playing) {
     playBtn.classList.replace('state-play', 'state-pause');
     record.classList.add('spinning');
     waveform.classList.add('playing');
-    setStatus('Live &bull; CD quality stream');
+    setStatus(isPreviewMode ? 'Playing preview &bull; iTunes' : 'Live &bull; CD quality stream');
   } else {
     playBtn.innerHTML = '&#9654;';
     playBtn.classList.replace('state-pause', 'state-play');
@@ -151,6 +154,11 @@ function renderVotes() {
 }
 
 function setStatus(msg) { statusEl.innerHTML = msg; }
+
+audio.addEventListener('ended', () => {
+  if (isPreviewMode) { setPlayState(false); setStatus('Preview ended'); }
+});
+
 // ── BILLBOARD YEAR-END TOP 100 DATA (1990s) ──
 const BILLBOARD = {
   1990: [
@@ -1186,6 +1194,82 @@ const songYearEl       = document.getElementById('songYear');
 const artistInitialsEl = document.getElementById('artistInitials');
 const artistImgEl      = document.getElementById('artistImg');
 const artistPlaceholderEl = document.getElementById('artistPlaceholder');
+const videoBtnEl          = document.getElementById('videoBtn');
+const videoModal          = document.getElementById('videoModal');
+const videoModalClose     = document.getElementById('videoModalClose');
+const videoPlayerEl       = document.getElementById('videoPlayer');
+
+videoBtnEl.addEventListener('click', () => {
+  if (!currentVideoUrl) return;
+  videoPlayerEl.src = currentVideoUrl;
+  videoModal.classList.add('open');
+  if (isPlaying) { audio.pause(); setPlayState(false); }
+  videoPlayerEl.play().catch(() => {});
+});
+videoModalClose.addEventListener('click', closeVideoModal);
+videoModal.addEventListener('click', e => { if (e.target === videoModal) closeVideoModal(); });
+function closeVideoModal() {
+  videoPlayerEl.pause();
+  videoPlayerEl.src = '';
+  videoModal.classList.remove('open');
+  if (isPreviewMode && audio.src) {
+    audio.play().then(() => setPlayState(true)).catch(() => {});
+  }
+}
+
+async function fetchItunesPreview(artist, song) {
+  try {
+    const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist + ' ' + song)}&media=music&entity=song&limit=5`);
+    const data = await res.json();
+    const hit  = data.results.find(r => r.previewUrl);
+    return hit ? hit.previewUrl : null;
+  } catch { return null; }
+}
+
+async function fetchItunesVideo(artist, song) {
+  function norm(s) {
+    return s.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[''`]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  function songMatch(trackName) {
+    const t = norm(trackName || ''), n = norm(song);
+    return t === n || t.includes(n) || n.includes(t);
+  }
+  function artistMatch(artistName) {
+    const a = norm(artistName || ''), n = norm(artist);
+    return a.includes(n) || n.includes(a);
+  }
+  async function searchVideos(term, limit) {
+    const res  = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=musicVideo&limit=${limit}`);
+    const data = await res.json();
+    return data.results || [];
+  }
+  try {
+    const byArtist = await searchVideos(artist, 25);
+    const hit1 = byArtist.find(r => r.previewUrl && songMatch(r.trackName));
+    if (hit1) return hit1.previewUrl;
+    const byCombined = await searchVideos(artist + ' ' + song, 10);
+    const hit2 = byCombined.find(r => r.previewUrl && songMatch(r.trackName) && artistMatch(r.artistName));
+    if (hit2) return hit2.previewUrl;
+    const bySong = await searchVideos(song, 15);
+    const hit3 = bySong.find(r => r.previewUrl && artistMatch(r.artistName));
+    if (hit3) return hit3.previewUrl;
+    return null;
+  } catch { return null; }
+}
+
+function switchToPreview(previewUrl) {
+  if (hls) hls.detachMedia();
+  isPreviewMode = true;
+  audio.src = previewUrl;
+  audio.play()
+    .then(() => setPlayState(true))
+    .catch(() => setStatus('Preview unavailable'));
+}
 
 const WIKI_MUSIC_RE = /musician|singer|songwriter|rapper|band|group|producer|vocalist|rock|pop|r&b|soul|jazz|country|composer|guitarist|drummer/i;
 
@@ -1214,11 +1298,14 @@ function getInitials(name) {
     .join('');
 }
 
-function updatePlayer(artist, song, year) {
+async function updatePlayer(artist, song, year) {
   songTitleEl.textContent      = song;
   artistNameEl.textContent     = artist;
   songYearEl.innerHTML         = `&bull;&nbsp;${year}&nbsp;&bull;`;
   artistInitialsEl.textContent = getInitials(artist);
+
+  videoBtnEl.style.display = 'none';
+  currentVideoUrl = null;
 
   const url = `/api/albumart?artist=${encodeURIComponent(artist)}&year=${encodeURIComponent(year)}`;
   const testImg = new Image();
@@ -1244,6 +1331,23 @@ function updatePlayer(artist, song, year) {
   testImg.src = url;
 
   document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  setStatus('Finding preview\u2026');
+  const [previewUrl, videoUrl] = await Promise.all([
+    fetchItunesPreview(artist, song),
+    fetchItunesVideo(artist, song)
+  ]);
+
+  if (previewUrl) {
+    switchToPreview(previewUrl);
+  } else {
+    setStatus('Preview not available');
+  }
+
+  if (videoUrl) {
+    currentVideoUrl = videoUrl;
+    videoBtnEl.style.display = '';
+  }
 }
 
 function renderCountdown(year) {
@@ -1282,10 +1386,29 @@ countdownBody.addEventListener('click', e => {
   updatePlayer(row.dataset.artist, row.dataset.song, parseInt(row.dataset.year, 10));
 });
 
+function resetPlayer() {
+  audio.pause();
+  setPlayState(false);
+  isPreviewMode   = false;
+  currentVideoUrl = null;
+  audio.src = '';
+  if (hls) hls.detachMedia();
+
+  songTitleEl.textContent      = 'Select a song';
+  artistNameEl.textContent     = 'Artist';
+  songYearEl.innerHTML         = '';
+  artistInitialsEl.textContent = '';
+  artistImgEl.style.display    = 'none';
+  artistPlaceholderEl.style.display = '';
+  videoBtnEl.style.display     = 'none';
+  setStatus('Click a song to preview');
+}
+
 document.querySelectorAll('.year-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    resetPlayer();
     renderCountdown(parseInt(btn.dataset.year, 10));
   });
 });
