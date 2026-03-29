@@ -730,7 +730,7 @@ function render(stats, songData, wiki) {
         }
         const from = highestSingle.firstDate ? highestSingle.firstDate.replace(/\s+\d+,/, '') : null;
         const to   = highestSingle.lastDate  ? highestSingle.lastDate.replace(/\s+\d+,/, '')  : null;
-        return from && to && from !== to ? `${base} · ${from} – ${to}` : from ? `${base} · ${from}` : base;
+        return from && to && from !== to ? `${base} · single on charts between ${from} – ${to}` : from ? `${base} · single on charts during ${from}` : base;
       })()
     },
     lowestSingle && lowestSingle.song !== highestSingle.song && {
@@ -739,10 +739,8 @@ function render(stats, songData, wiki) {
       meta:  (() => {
         const from = lowestSingle.firstDate ? lowestSingle.firstDate.replace(/\s+\d+,/, '') : null;
         const to   = lowestSingle.lastDate  ? lowestSingle.lastDate.replace(/\s+\d+,/, '')  : null;
-        const range = from && to && from !== to ? `${from} – ${to}` : from || null;
-        return range
-          ? `Charted ${range}, peaked at #${lowestSingle.bestPosition}`
-          : `Peaked at #${lowestSingle.bestPosition}`;
+        const base = `Peak #${lowestSingle.bestPosition}`;
+        return from && to && from !== to ? `${base} · single on charts between ${from} – ${to}` : from ? `${base} · single on charts during ${from}` : base;
       })()
     },
     longestRunning && longestRunning.totalWeeks > 1 && {
