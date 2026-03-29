@@ -98,10 +98,10 @@ Matching strategy in `index.js`:
 | Animated waveform + media element spin | ✅ Done | All three player pages |
 | Mobile responsive layout | ✅ Done | All three decade pages; breakpoints at 480px, 360px, 320px |
 | Billboard Top 100 Countdown (70s) | ✅ Done | `70s.js` — year buttons 1970–1979, full 100-song table per year sourced from CSV; descending display (100→1) |
-| Billboard Top 100 Countdown (80s, 90s) | 🔲 Planned | Same pattern as 70s; data available in CSV |
-| Countdown row → player update (70s) | ✅ Done | Clicking any row updates player song/artist/year; selected row highlighted |
-| Album art display (70s) | ✅ Done | `GET /api/albumart` searches decade-first; fuzzy artist name matching; falls back to initials |
-| Album art display (80s, 90s) | 🔲 Planned | API already supports all decades; needs countdown + row-click added to 80s/90s pages |
+| Billboard Top 100 Countdown (80s) | ✅ Done | `80s.js` — year buttons 1980–1989, full 100-song table per year; descending display (100→1) |
+| Billboard Top 100 Countdown (90s) | ✅ Done | `90s.js` — year buttons 1990–1999, full 100-song table per year; descending display (100→1) |
+| Countdown row → player update (all decades) | ✅ Done | Clicking any row updates player song/artist/year/initials; selected row highlighted |
+| Album art display (all decades) | ✅ Done | `GET /api/albumart` searches decade-first; fuzzy artist name matching; falls back to initials |
 | Song rating (thumbs up / down) | ✅ UI done | Client-side only — no API or DB persistence yet |
 | Song lyrics display | 🔲 Planned | |
 | Rating persistence via API + DB | 🔲 Planned | UI hooks are in place; needs `/api/ratings` route and DB schema |
