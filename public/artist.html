@@ -619,6 +619,17 @@ probe.onload = () => {
   bg.style.backgroundImage = `url(${artSrc})`;
   requestAnimationFrame(() => bg.classList.add('ready'));
 };
+probe.onerror = () => {
+  fetchWiki(ARTIST).then(data => {
+    const thumb = data && data.thumbnail && data.thumbnail.source;
+    if (!thumb) return;
+    document.getElementById('heroArt').innerHTML =
+      `<img src="${thumb}" alt="${esc(ARTIST)}">`;
+    const bg = document.getElementById('heroBgArt');
+    bg.style.backgroundImage = `url(${thumb})`;
+    requestAnimationFrame(() => bg.classList.add('ready'));
+  });
+};
 probe.src = artSrc;
 
 // ── Wikipedia: try bare name, then music-specific suffixes ──────────────────
@@ -712,7 +723,11 @@ function render(stats, songData, wiki) {
       label: 'Highest Charting Single',
       song:  highestSingle.song,
       meta:  (() => {
-        const base = `Peak #${highestSingle.bestPosition}`;
+        const base  = `Peak #${highestSingle.bestPosition}`;
+        const tied  = allSongs.filter(s => s.bestPosition === highestSingle.bestPosition);
+        if (tied.length > 1) {
+          return `${base} · Longest run among ${tied.length} #${highestSingle.bestPosition} singles · Single spent ${highestSingle.totalWeeks} weeks on the charts`;
+        }
         const from = highestSingle.firstDate ? highestSingle.firstDate.replace(/\s+\d+,/, '') : null;
         const to   = highestSingle.lastDate  ? highestSingle.lastDate.replace(/\s+\d+,/, '')  : null;
         return from && to && from !== to ? `${base} · ${from} – ${to}` : from ? `${base} · ${from}` : base;
