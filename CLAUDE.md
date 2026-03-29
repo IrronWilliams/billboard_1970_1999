@@ -125,19 +125,20 @@ The artist link omits the song param so `artist.html` loads focused on the artis
 
 ## RIAA certified units scraper
 
-A one-time data extraction script lives at:
-```
-~/ProjectNotes/billboard_1970_1999_notes/scrape_riaa.js
-```
-Run with `node scrape_riaa.js` from that directory. It:
-- Reads all 2,923 unique artist+song pairs from `Billboard1970-1999_Remote.csv`
-- Searches `https://www.riaa.com/gold-platinum/` for each song (Single format)
-- Extracts the highest certification level from the award row icon (`icons/N_big.png` where N=0 is Gold, N=1–9 is Nx Platinum, N=10 is Diamond)
-- Fetches the "Certified Units" value via WordPress AJAX (`action=load_detail_from_recent`)
-- Saves progress incrementally to `riaa_certified_units.json` every 25 entries (re-run safe)
-- Rate limited to ~700ms between requests
+Two one-time data scripts live at `~/ProjectNotes/billboard_1970_1999_notes/`:
 
-Output JSON format: `{ "ARTIST|||SONG": { certLevel, certUnits, awardId } | null }`
+**`scrape_riaa.js`** — fetches current certification data from `riaa.com/gold-platinum/`:
+- Reads all 2,923 unique artist+song pairs from `Billboard1970-1999_Remote.csv`
+- Searches RIAA for each song (Single format); extracts highest certification level from award row icon (`icons/N_big.png` where N=0=Gold, N=1–9=Nx Platinum, N=10=Diamond)
+- Fetches "Certified Units" value via WordPress AJAX (`action=load_detail_from_recent`)
+- Saves progress to `riaa_certified_units.json` every 25 entries (re-run safe); ~70 min for full run
+- Output: `{ "ARTIST|||SONG": { certLevel, certUnits, awardId } | null }` — 904 certified, 2,030 not found
+
+**`apply_riaa.js`** — applies `riaa_certified_units.json` to the three decade JS files:
+- Only updates entries where JSON has a non-null certification; null entries left unchanged
+- Formats: Gold → `Gold`, 1x Platinum → `Platinum`, Nx Platinum → `N× Platinum`, Diamond → `Diamond`
+- Uses exact key match first (`ARTIST|||SONG`), normalized fallback for edge cases
+- Applied 549 updates across `70s.js` (300), `80s.js` (119), `90s.js` (130)
 
 ## Feature status
 
@@ -155,7 +156,7 @@ Output JSON format: `{ "ARTIST|||SONG": { certLevel, certUnits, awardId } | null
 | Artist profile page | ✅ Done | `public/artist.html` — biography (Wikipedia), Billboard stats, song stats, chart history; linked via ↗ icon in artist and song cells of all countdown tables |
 | Artist profile link (artist cell) | ✅ Done | Opens `artist.html?artist=NAME` — artist overview, no pre-selected song |
 | Song profile link (song cell) | ✅ Done | Opens `artist.html?artist=NAME&song=SONG&year=YEAR` — pre-populates Selected Song panel |
-| RIAA certified units data | 🔲 In progress | Scraper ready at `~/ProjectNotes/.../scrape_riaa.js`; run once to produce `riaa_certified_units.json`; CSV + decade JS update pending |
+| RIAA certified units data | ✅ Done | 904/2,923 songs certified; 549 JS entries updated via `apply_riaa.js`; data in `riaa_certified_units.json` |
 | Song rating (thumbs up / down) | ✅ UI done | Client-side only — no API or DB persistence yet |
 | Song lyrics display | 🔲 Planned | |
 | Rating persistence via API + DB | 🔲 Planned | UI hooks are in place; needs `/api/ratings` route and DB schema |
