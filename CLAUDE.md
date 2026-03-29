@@ -106,7 +106,38 @@ Matching strategy in `index.js`:
 2. Accumulate filename words until they equal the normalized artist name
 3. Decade-first search: year folders within the clicked song's decade are searched before other decades
 4. Fallback candidates: strip leading "The", then try the name before " and " (e.g. "Paul McCartney and Wings" → "Paul McCartney")
-5. 404 falls back silently to the initials placeholder in the player
+5. On 404, client-side `fetchWikiThumb()` queries the Wikipedia summary API for a thumbnail image before falling back to the initials placeholder
+
+**Wikipedia image fallback** (`70s.js`, `80s.js`, `90s.js`, `artist.html`): when `GET /api/albumart` returns 404, `fetchWikiThumb(artist)` is called. It uses the same music-keyword guard and suffix chain as `fetchWiki()` (`(musician)`, `(singer)`, `(band)`, `(rapper)`), but returns only the `thumbnail.source` URL. Applied in the `testImg.onerror` / `probe.onerror` handler on all four pages.
+
+## Artist and song profile links
+
+Each countdown row has **two** `↗` profile links:
+
+| Link location | Destination URL | Tooltip |
+|---|---|---|
+| Artist name cell | `artist.html?artist=NAME` | "Click for artist bio" |
+| Song title cell | `artist.html?artist=NAME&song=SONG&year=YEAR` | "Click for song details" |
+
+Both use `class="profile-link"`. The row click handler guards against both: `if (e.target.closest('a.profile-link')) return;`
+
+The artist link omits the song param so `artist.html` loads focused on the artist overview. The song link passes all params so the Selected Song panel pre-populates.
+
+## RIAA certified units scraper
+
+A one-time data extraction script lives at:
+```
+~/ProjectNotes/billboard_1970_1999_notes/scrape_riaa.js
+```
+Run with `node scrape_riaa.js` from that directory. It:
+- Reads all 2,923 unique artist+song pairs from `Billboard1970-1999_Remote.csv`
+- Searches `https://www.riaa.com/gold-platinum/` for each song (Single format)
+- Extracts the highest certification level from the award row icon (`icons/N_big.png` where N=0 is Gold, N=1–9 is Nx Platinum, N=10 is Diamond)
+- Fetches the "Certified Units" value via WordPress AJAX (`action=load_detail_from_recent`)
+- Saves progress incrementally to `riaa_certified_units.json` every 25 entries (re-run safe)
+- Rate limited to ~700ms between requests
+
+Output JSON format: `{ "ARTIST|||SONG": { certLevel, certUnits, awardId } | null }`
 
 ## Feature status
 
@@ -120,8 +151,11 @@ Matching strategy in `index.js`:
 | Billboard Top 100 Countdown (80s) | ✅ Done | `80s.js` — year buttons 1980–1989, full 100-song table per year; descending display (100→1) |
 | Billboard Top 100 Countdown (90s) | ✅ Done | `90s.js` — year buttons 1990–1999, full 100-song table per year; descending display (100→1) |
 | Countdown row → player update (all decades) | ✅ Done | Clicking any row updates player song/artist/year/initials; selected row highlighted |
-| Album art display (all decades) | ✅ Done | `GET /api/albumart` searches decade-first; fuzzy artist name matching; falls back to initials |
-| Artist profile page | ✅ Done | `public/artist.html` — biography (Wikipedia), Billboard stats, song stats, chart history; linked via ↗ icon in all countdown tables |
+| Album art display (all decades) | ✅ Done | `GET /api/albumart` searches decade-first; fuzzy artist name matching; Wikipedia thumbnail fallback via `fetchWikiThumb()`; falls back to initials |
+| Artist profile page | ✅ Done | `public/artist.html` — biography (Wikipedia), Billboard stats, song stats, chart history; linked via ↗ icon in artist and song cells of all countdown tables |
+| Artist profile link (artist cell) | ✅ Done | Opens `artist.html?artist=NAME` — artist overview, no pre-selected song |
+| Song profile link (song cell) | ✅ Done | Opens `artist.html?artist=NAME&song=SONG&year=YEAR` — pre-populates Selected Song panel |
+| RIAA certified units data | 🔲 In progress | Scraper ready at `~/ProjectNotes/.../scrape_riaa.js`; run once to produce `riaa_certified_units.json`; CSV + decade JS update pending |
 | Song rating (thumbs up / down) | ✅ UI done | Client-side only — no API or DB persistence yet |
 | Song lyrics display | 🔲 Planned | |
 | Rating persistence via API + DB | 🔲 Planned | UI hooks are in place; needs `/api/ratings` route and DB schema |

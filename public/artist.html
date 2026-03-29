@@ -619,6 +619,17 @@ probe.onload = () => {
   bg.style.backgroundImage = `url(${artSrc})`;
   requestAnimationFrame(() => bg.classList.add('ready'));
 };
+probe.onerror = () => {
+  fetchWiki(ARTIST).then(data => {
+    const thumb = data && data.thumbnail && data.thumbnail.source;
+    if (!thumb) return;
+    document.getElementById('heroArt').innerHTML =
+      `<img src="${thumb}" alt="${esc(ARTIST)}">`;
+    const bg = document.getElementById('heroBgArt');
+    bg.style.backgroundImage = `url(${thumb})`;
+    requestAnimationFrame(() => bg.classList.add('ready'));
+  });
+};
 probe.src = artSrc;
 
 // ── Wikipedia: try bare name, then music-specific suffixes ──────────────────

@@ -1196,6 +1196,25 @@ const artistInitialsEl = document.getElementById('artistInitials');
 const artistImgEl      = document.getElementById('artistImg');
 const artistPlaceholderEl = document.getElementById('artistPlaceholder');
 
+const WIKI_MUSIC_RE = /musician|singer|songwriter|rapper|band|group|producer|vocalist|rock|pop|r&b|soul|jazz|country|composer|guitarist|drummer/i;
+
+function fetchWikiThumb(name) {
+  const tries = [name, name + ' (musician)', name + ' (singer)', name + ' (band)', name + ' (rapper)'];
+  function attempt(i) {
+    if (i >= tries.length) return Promise.resolve(null);
+    return fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tries[i])}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || data.type === 'disambiguation') return attempt(i + 1);
+        const text = (data.description || '') + ' ' + (data.extract || '').slice(0, 300);
+        if (i === 0 && !WIKI_MUSIC_RE.test(text)) return attempt(i + 1);
+        return (data.thumbnail && data.thumbnail.source) ? data.thumbnail.source : null;
+      })
+      .catch(() => attempt(i + 1));
+  }
+  return attempt(0);
+}
+
 function getInitials(name) {
   return name.split(/[\s&,]+/)
     .filter(w => /^[A-Za-z0-9]/.test(w))
@@ -1220,8 +1239,17 @@ function updatePlayer(artist, song, year) {
     artistPlaceholderEl.style.display = 'none';
   };
   testImg.onerror = () => {
-    artistImgEl.style.display = 'none';
-    artistPlaceholderEl.style.display = '';
+    fetchWikiThumb(artist).then(thumbUrl => {
+      if (thumbUrl) {
+        artistImgEl.src = thumbUrl;
+        artistImgEl.alt = artist;
+        artistImgEl.style.display = 'block';
+        artistPlaceholderEl.style.display = 'none';
+      } else {
+        artistImgEl.style.display = 'none';
+        artistPlaceholderEl.style.display = '';
+      }
+    });
   };
   testImg.src = url;
 
@@ -1241,11 +1269,12 @@ function renderCountdown(year) {
       : `<span class="riaa-none">—</span>`;
     const safeArtist = artist.replace(/'/g, '&#39;');
     const safeSong   = song.replace(/'/g, '&#39;');
-    const profileUrl = `artist.html?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}&year=${year}`;
+    const artistUrl = `artist.html?artist=${encodeURIComponent(artist)}`;
+    const songUrl   = `artist.html?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}&year=${year}`;
     return `<tr data-artist="${safeArtist}" data-song="${safeSong}" data-year="${year}">
       <td class="col-rank"><span class="rank-badge ${rankClass}">${pos}</span></td>
-      <td class="td-artist">${artist} <a href="${profileUrl}" class="profile-link" title="View artist profile">&#8599;</a></td>
-      <td class="td-song">${song}</td>
+      <td class="td-artist">${artist} <a href="${artistUrl}" class="profile-link" title="Click for artist bio">&#8599;</a></td>
+      <td class="td-song">${song} <a href="${songUrl}" class="profile-link" title="Click for song details">&#8599;</a></td>
       <td class="td-riaa">${riaaCell}</td>
     </tr>`;
   }).join('');
