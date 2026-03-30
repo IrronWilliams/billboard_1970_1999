@@ -1,2 +1,7 @@
 node_modules/
 data.db
+
+# Claude Code tooling
+.agents/
+.claude/
+skills-lock.json
