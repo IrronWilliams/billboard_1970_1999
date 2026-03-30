@@ -12,7 +12,8 @@ An online radio station website for Billboard's Top 100 songs from 1970–1999. 
 |---|---|
 | Reverse proxy / static files | nginx (Alpine Docker image) |
 | API server | Express.js on Node 20 (Docker) |
-| Database | SQLite via `better-sqlite3` |
+| Chart/song database | SQLite via `better-sqlite3` (read-only reference data) |
+| Ratings database | PostgreSQL via `pg` — local: Docker service; prod: Supabase |
 | Audio streaming | HLS via hls.js (CDN); iTunes 30-sec preview on song select (80s) |
 | Music video preview | iTunes Search API — 30-sec MP4 clip in modal (80s) |
 
@@ -46,12 +47,20 @@ scripts/         One-off utility scripts
   gen_pages.py   Regenerates 70s2/80s2/90s2/artist2 files from source JS; run with `python3 scripts/gen_pages.py`
                  Outputs separate .html, .css, and .js files for each v2 decade page
 docs/            Decision logs — one Markdown file per session, named YYYY-MM-DD-*.md
+tests/           Jest test suites
+  unit/          ratings.test.js — 37 unit tests for routes/ratings.js (pool mocked)
+  integration/   ratings.integration.test.js — 41 integration tests (full request flow, pool mocked)
 index.js         Express entry point — add all API routes here
 db.js            Exports a single shared better-sqlite3 connection (WAL mode, foreign keys on)
+ratingsDb.js     Exports a pg Pool for PostgreSQL ratings DB (configured via DATABASE_URL env var)
+routes/
+  ratings.js     GET / POST / DELETE /api/ratings — IP-based vote persistence
+init-db.sql      PostgreSQL schema DDL — auto-runs on first `docker compose up` via initdb mount
+jest.config.js   Jest configuration
 nginx.conf       nginx config — serves public/, proxies /api/* to Express
 Dockerfile.node  Node container
 Dockerfile.nginx nginx container
-docker-compose.yml  Defines `node` and `web` services + db_data volume
+docker-compose.yml  Defines `node`, `web`, and `postgres` services + db_data / ratings_data volumes
 ```
 
 ## Running the app
@@ -73,6 +82,8 @@ App is available at **http://localhost:3001**.
 - **The server is assumed to be already running.** Do not start it unless necessary; if a restart is needed, run it in the background.
 - **`better-sqlite3` is a native module** — `.dockerignore` excludes `node_modules` so it recompiles inside the container. If running outside Docker via `npm start`, it must be compiled against the local Node version.
 - The SQLite database is persisted in the `db_data` named Docker volume at `/app/data/data.db` inside the container.
+- **PostgreSQL ratings DB** is configured via `DATABASE_URL` environment variable. Locally this points to the `postgres` Docker service; in production set it to the Supabase connection string. Run `init-db.sql` once in Supabase SQL editor before first deploy.
+- **Running tests**: `npm test` (Jest + supertest, no real DB required — pool is mocked).
 
 ## GitHub integration
 
@@ -200,8 +211,8 @@ Two one-time data scripts live at `~/ProjectNotes/billboard_1970_1999_notes/`:
 | iTunes audio preview (all decades) | ✅ Done | `70s.js`, `80s.js`, `90s.js` — row click fetches 30-sec AAC via iTunes Search API; HLS detached on select; auto-plays |
 | iTunes video preview modal (all decades) | ✅ Done | `▶ Video` button appears when iTunes has a video clip; opens 30-sec MP4 in modal; audio pauses while modal is open; modal themed per era |
 | Player reset on year change (all decades) | ✅ Done | `resetPlayer()` clears all fields and stops audio when a year button is clicked |
-| Song rating (thumbs up / down) | ✅ UI done | Client-side only — no API or DB persistence yet |
+| Song rating (thumbs up / down) | ✅ Done | IP-based persistence via PostgreSQL; GET/POST/DELETE `/api/ratings`; aggregate counts + userVote fetched on song select; toggle/switch supported |
 | Redesigned decade players (v2) | ✅ Done | `public/70s2.html/css/js`, `80s2.html/css/js`, `90s2.html/css/js` — separate HTML/CSS/JS per page, distinctive era aesthetics, all original functionality preserved; regenerate via `python3 scripts/gen_pages.py` |
 | Redesigned artist profile (v2) | ✅ Done | `public/artist2.html` — Dark Editorial/Art Deco Newspaper aesthetic; linked from v2 decade pages |
 | Song lyrics display | 🔲 Planned | |
-| Rating persistence via API + DB | 🔲 Planned | UI hooks are in place; needs `/api/ratings` route and DB schema |
+| Rating persistence via API + DB | ✅ Done | PostgreSQL via `pg`; schema in `init-db.sql`; router in `routes/ratings.js`; 78 tests passing |

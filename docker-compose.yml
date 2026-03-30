@@ -6,10 +6,30 @@ services:
       dockerfile: Dockerfile.node
     environment:
       PORT: 3001
+      DATABASE_URL: postgres://billboard:billboard@postgres:5432/billboard
     volumes:
       - db_data:/app/data
       - /home/iwilliams/ProjectNotes/billboard_1970_1999_notes/AlbumArt:/app/albumart:ro
       - /home/iwilliams/ProjectNotes/billboard_1970_1999_notes/Billboard1970-1999_Detail_Remote.csv:/app/chartdata/Billboard1970-1999_Detail_Remote.csv:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: billboard
+      POSTGRES_PASSWORD: billboard
+      POSTGRES_DB: billboard
+    volumes:
+      - ratings_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U billboard -d billboard"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
 
   web:
@@ -25,3 +45,4 @@ services:
 
 volumes:
   db_data:
+  ratings_data:

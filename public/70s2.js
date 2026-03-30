@@ -19,9 +19,13 @@ let hlsReady       = false;
 let isPreviewMode  = false;
 let currentVideoUrl = null;
 let updateSeq      = 0;
-let upVotes   = 0;
-let downVotes = 0;
-let userVote  = null; // 'up' | 'down' | null
+let upVotes      = 0;
+let downVotes    = 0;
+let userVote     = null; // 'up' | 'down' | null
+let currentArtist = null;
+let currentSong   = null;
+let currentYear   = null;
+let currentDecade = null;
 
 // ── HLS INIT ──
 (function initHls() {
@@ -118,39 +122,52 @@ speakerEl.addEventListener('click', () => {
 syncVolume(); // set initial state
 
 // ── RATING ──
-thumbUp.addEventListener('click', () => {
-  if (userVote === 'up') {
-    // Toggle off
-    upVotes--;
-    userVote = null;
-    thumbUp.classList.remove('voted-up');
-  } else {
-    if (userVote === 'down') {
-      downVotes = Math.max(0, downVotes - 1);
-      thumbDown.classList.remove('voted-down');
+async function fetchRatings(artist, song) {
+  try {
+    const res = await fetch(`/api/ratings?song=${encodeURIComponent(song)}&artist=${encodeURIComponent(artist)}`);
+    return res.ok ? await res.json() : { up: 0, down: 0, userVote: null };
+  } catch { return { up: 0, down: 0, userVote: null }; }
+}
+
+async function castVote(vote) {
+  if (!currentSong) return null;
+  try {
+    if (vote === null) {
+      const res = await fetch(
+        `/api/ratings?song=${encodeURIComponent(currentSong)}&artist=${encodeURIComponent(currentArtist)}`,
+        { method: 'DELETE' }
+      );
+      return res.ok ? await res.json() : null;
+    } else {
+      const res = await fetch('/api/ratings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ song: currentSong, artist: currentArtist, year: currentYear, decade: currentDecade, vote })
+      });
+      return res.ok ? await res.json() : null;
     }
-    upVotes++;
-    userVote = 'up';
-    thumbUp.classList.add('voted-up');
-  }
+  } catch { return null; }
+}
+
+function applyRatings(data) {
+  upVotes   = data.up;
+  downVotes = data.down;
+  userVote  = data.userVote;
+  thumbUp.classList.toggle('voted-up',   userVote === 'up');
+  thumbDown.classList.toggle('voted-down', userVote === 'down');
   renderVotes();
+}
+
+thumbUp.addEventListener('click', async () => {
+  if (!currentSong) return;
+  const data = await castVote(userVote === 'up' ? null : 'up');
+  if (data) applyRatings(data);
 });
 
-thumbDown.addEventListener('click', () => {
-  if (userVote === 'down') {
-    downVotes--;
-    userVote = null;
-    thumbDown.classList.remove('voted-down');
-  } else {
-    if (userVote === 'up') {
-      upVotes = Math.max(0, upVotes - 1);
-      thumbUp.classList.remove('voted-up');
-    }
-    downVotes++;
-    userVote = 'down';
-    thumbDown.classList.add('voted-down');
-  }
-  renderVotes();
+thumbDown.addEventListener('click', async () => {
+  if (!currentSong) return;
+  const data = await castVote(userVote === 'down' ? null : 'down');
+  if (data) applyRatings(data);
 });
 
 function renderVotes() {
@@ -1337,6 +1354,10 @@ function loadArtistImage(itunesArtwork, artist, year) {
 
 async function updatePlayer(artist, song, year) {
   const seq = ++updateSeq;
+  currentArtist = artist;
+  currentSong   = song;
+  currentYear   = year;
+  currentDecade = Math.floor(year / 10) * 10;
 
   songTitleEl.textContent      = song;
   artistNameEl.textContent     = artist;
@@ -1349,13 +1370,15 @@ async function updatePlayer(artist, song, year) {
   document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   setStatus('Finding preview\u2026');
-  const [itunesResult, videoUrl] = await Promise.all([
+  const [itunesResult, videoUrl, ratings] = await Promise.all([
     fetchItunesPreview(artist, song),
-    fetchItunesVideo(artist, song)
+    fetchItunesVideo(artist, song),
+    fetchRatings(artist, song)
   ]);
 
   if (seq !== updateSeq) return; // superseded by a newer selection
 
+  applyRatings(ratings);
   loadArtistImage(itunesResult ? itunesResult.artworkUrl : null, artist, year);
 
   if (itunesResult && itunesResult.previewUrl) {
@@ -1413,6 +1436,10 @@ function resetPlayer() {
   setPlayState(false);
   isPreviewMode   = false;
   currentVideoUrl = null;
+  currentArtist   = null;
+  currentSong     = null;
+  currentYear     = null;
+  currentDecade   = null;
   audio.src = '';
   if (hls) hls.detachMedia();
 
@@ -1423,6 +1450,10 @@ function resetPlayer() {
   artistImgEl.style.display    = 'none';
   artistPlaceholderEl.style.display = '';
   videoBtnEl.style.display     = 'none';
+  upVotes = 0; downVotes = 0; userVote = null;
+  thumbUp.classList.remove('voted-up');
+  thumbDown.classList.remove('voted-down');
+  renderVotes();
   setStatus('Click a song to preview');
 }
 
