@@ -15,6 +15,12 @@ def write_html(name, content):
         f.write(content)
     print(f'Created {path} ({len(content):,} bytes)')
 
+def write_css(name, content):
+    path = f'{PUB}/{name}'
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content.strip() + '\n')
+    print(f'Created {path} ({len(content):,} bytes)')
+
 def patch_js(js, filled, unfilled, play_text=False):
     """Apply per-page substitutions to the source JS."""
     # Fix artist profile links
@@ -1630,7 +1636,15 @@ HTML_ARTIST = """<header class="header">
 # Build functions
 # ─────────────────────────────────────────────────────────────────────────────
 
-def make_decade_html(title, fonts_url, css, body_html, js, modal=SHARED_MODAL, hls=HLS_CDN):
+def make_decade_html(title, fonts_url, css, body_html, js, modal=SHARED_MODAL, hls=HLS_CDN, css_file=None, js_file=None):
+    if css_file:
+        styles = f'  <link rel="stylesheet" href="{css_file}">'
+    else:
+        styles = f'  <style>\n{css}\n  </style>'
+    if js_file:
+        script_block = f'<script src="{js_file}"></script>'
+    else:
+        script_block = f'<script>\n{js}\n</script>'
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1638,17 +1652,13 @@ def make_decade_html(title, fonts_url, css, body_html, js, modal=SHARED_MODAL, h
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
   <link href="{fonts_url}" rel="stylesheet">
-  <style>
-{css}
-  </style>
+{styles}
 </head>
 <body>
 {body_html}
 {modal}
 {hls}
-<script>
-{js}
-</script>
+{script_block}
 </body>
 </html>"""
 
@@ -1681,17 +1691,23 @@ FONTS_70S = "https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Teko:
 FONTS_80S = "https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@300;400;700;900&family=Share+Tech+Mono&display=swap"
 FONTS_90S = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300;1,9..144,600&family=Fira+Sans+Condensed:wght@400;600&family=Fira+Mono:wght@400;500&display=swap"
 
-# 70s2.html
+# 70s2.html — CSS and JS in separate files
 js70 = patch_js(read_js('70s.js'), '#c4580a', '#d8c898')
-write_html('70s2.html', make_decade_html("Soul FM — 1970s Live Radio", FONTS_70S, CSS_70S, HTML_BODY_70S, js70))
+write_css('70s2.css', CSS_70S)
+write_html('70s2.js', js70)
+write_html('70s2.html', make_decade_html("Soul FM — 1970s Live Radio", FONTS_70S, None, HTML_BODY_70S, None, css_file='70s2.css', js_file='70s2.js'))
 
-# 80s2.html
+# 80s2.html — CSS and JS in separate files
 js80 = patch_js(read_js('80s.js'), '#ff0066', '#1c1c1c', play_text=True)
-write_html('80s2.html', make_decade_html("Power 80s — 1980s Live Radio", FONTS_80S, CSS_80S, HTML_BODY_80S, js80))
+write_css('80s2.css', CSS_80S)
+write_html('80s2.js', js80)
+write_html('80s2.html', make_decade_html("Power 80s — 1980s Live Radio", FONTS_80S, None, HTML_BODY_80S, None, css_file='80s2.css', js_file='80s2.js'))
 
-# 90s2.html
+# 90s2.html — CSS and JS in separate files
 js90 = patch_js(read_js('90s.js'), '#2d1fff', '#d0ccc0')
-write_html('90s2.html', make_decade_html("Altitude 99 — 1990s Live Radio", FONTS_90S, CSS_90S, HTML_BODY_90S, js90))
+write_css('90s2.css', CSS_90S)
+write_html('90s2.js', js90)
+write_html('90s2.html', make_decade_html("Altitude 99 — 1990s Live Radio", FONTS_90S, None, HTML_BODY_90S, None, css_file='90s2.css', js_file='90s2.js'))
 
 # artist2.html — extract just the JS from artist.html
 with open(f'{PUB}/artist.html', 'r', encoding='utf-8') as f:

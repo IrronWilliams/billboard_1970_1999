@@ -61,13 +61,13 @@ playBtn.addEventListener('click', () => {
 function setPlayState(playing) {
   isPlaying = playing;
   if (playing) {
-    playBtn.innerHTML = '&#9646;&#9646;';
+    playBtn.textContent = 'PAUSE';
     playBtn.classList.replace('state-play', 'state-pause');
     record.classList.add('spinning');
     waveform.classList.add('playing');
     setStatus(isPreviewMode ? 'Playing preview &bull; iTunes' : 'Live &bull; On air now');
   } else {
-    playBtn.innerHTML = '&#9654;';
+    playBtn.textContent = 'PLAY';
     playBtn.classList.replace('state-pause', 'state-play');
     record.classList.remove('spinning');
     waveform.classList.remove('playing');
@@ -1389,8 +1389,8 @@ function renderCountdown(year) {
       : `<span class="riaa-none">—</span>`;
     const safeArtist = artist.replace(/'/g, '&#39;');
     const safeSong   = song.replace(/'/g, '&#39;');
-    const artistUrl = `artist.html?artist=${encodeURIComponent(artist)}`;
-    const songUrl   = `artist.html?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}&year=${year}`;
+    const artistUrl = `artist2.html?artist=${encodeURIComponent(artist)}`;
+    const songUrl   = `artist2.html?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}&year=${year}`;
     return `<tr data-artist="${safeArtist}" data-song="${safeSong}" data-year="${year}">
       <td class="col-rank"><span class="rank-badge ${rankClass}">${pos}</span></td>
       <td class="td-artist">${artist} <a href="${artistUrl}" class="profile-link" title="Click for artist bio">&#8599;</a></td>

@@ -84,8 +84,8 @@ function syncVolume() {
   volPct.textContent = pct + '%';
 
   // Gradient fill on track
-  const filled   = '#d95c0a';
-  const unfilled = '#3d2000';
+  const filled   = '#c4580a';
+  const unfilled = '#d8c898';
   volSlider.style.background =
     `linear-gradient(90deg, ${filled} ${pct}%, ${unfilled} ${pct}%)`;
 
@@ -1383,8 +1383,8 @@ function renderCountdown(year) {
       : `<span class="riaa-none">—</span>`;
     const safeArtist = artist.replace(/'/g, '&#39;');
     const safeSong   = song.replace(/'/g, '&#39;');
-    const artistUrl = `artist.html?artist=${encodeURIComponent(artist)}`;
-    const songUrl   = `artist.html?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}&year=${year}`;
+    const artistUrl = `artist2.html?artist=${encodeURIComponent(artist)}`;
+    const songUrl   = `artist2.html?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}&year=${year}`;
     return `<tr data-artist="${safeArtist}" data-song="${safeSong}" data-year="${year}">
       <td class="col-rank"><span class="rank-badge ${rankClass}">${pos}</span></td>
       <td class="td-artist">${artist} <a href="${artistUrl}" class="profile-link" title="Click for artist bio">&#8599;</a></td>

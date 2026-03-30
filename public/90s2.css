@@ -1,0 +1,277 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #f0ece2;
+      --surface:   #ffffff;
+      --ink:       #0a0a14;
+      --indigo:    #2d1fff;
+      --indigo-lt: #6655ff;
+      --rust:      #d92b0a;
+      --muted:     #6a6a7a;
+      --rule:      #d0ccc0;
+      --cd-silver: #c8c8d0;
+      --green-up:  #0a7a30;
+      --red-down:  #d92b0a;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Fira Sans Condensed', sans-serif;
+      min-height: 100vh;
+      padding: 32px 20px 56px;
+    }
+    .page-wrap {
+      max-width: 880px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 40px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      max-width: 480px; margin: 0 auto; width: 100%;
+      background: var(--surface);
+      border-left: 6px solid var(--indigo);
+      box-shadow: 0 2px 0 var(--rule), 4px 8px 24px rgba(0,0,0,.10);
+      padding: 32px 28px 24px; position: relative;
+    }
+
+    /* ── LIVE BADGE ── */
+    .live-badge {
+      position: absolute; top: 20px; right: 28px;
+      background: var(--rust); color: #fff;
+      font-family: 'Fira Mono'; font-size: .52rem; letter-spacing: .08em; text-transform: uppercase;
+      padding: 3px 7px; display: flex; align-items: center; gap: 5px;
+    }
+    .live-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: #fff;
+      animation: pulse-dot 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* ── STATION ── */
+    .station { margin-bottom: 22px; }
+    .station-eyebrow {
+      font-family: 'Fira Sans Condensed'; font-size: .68rem; font-weight: 600;
+      letter-spacing: .28em; text-transform: uppercase; color: var(--muted);
+      display: block; margin-bottom: 0;
+    }
+    .station-numeral {
+      font-family: 'Syne'; font-weight: 800;
+      font-size: 5rem; line-height: .82; color: var(--ink); display: block;
+    }
+    .station-sub-line {
+      font-family: 'Fira Mono'; font-size: .58rem; color: var(--muted); margin-top: 6px;
+    }
+
+    /* ── MEDIA ROW ── */
+    .media-row { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+
+    /* Compact Disc */
+    .cd {
+      width: 148px; height: 148px; border-radius: 50%; flex-shrink: 0; position: relative;
+      background: radial-gradient(circle at 50%, #e4e4ec 0%, #c8c8d4 40%, #a8a8b8 70%, #b4b4c0 100%);
+      box-shadow: 2px 4px 16px rgba(0,0,0,.18), inset 0 0 0 1px rgba(255,255,255,.3);
+      transform: rotate(8deg);
+      transition: transform .6s ease;
+    }
+    .cd::after {
+      content: ''; position: absolute; inset: 0; border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        rgba(45,31,255,.1) 0deg, rgba(0,200,100,.07) 60deg,
+        rgba(217,43,10,.09) 120deg, rgba(255,200,0,.07) 180deg,
+        rgba(45,31,255,.1) 240deg, rgba(0,200,100,.05) 300deg,
+        rgba(45,31,255,.1) 360deg);
+      mix-blend-mode: screen;
+    }
+    .cd::before {
+      content: ''; position: absolute; inset: 0; border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.3) 0%, transparent 55%);
+      z-index: 1;
+    }
+    .cd-hub {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 22px; height: 22px; border-radius: 50%; z-index: 2;
+      background: var(--ink); border: 4px solid var(--cd-silver);
+    }
+    .cd-label {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--surface); border: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: center; z-index: 1;
+    }
+    .cd-label-text { font-family:'Syne'; font-weight:800; font-size:.48rem; color:var(--ink); letter-spacing:.04em; }
+    @keyframes cd-spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    #record.spinning { animation: cd-spin 1.8s linear infinite; }
+    #record:not(.spinning) { transform: rotate(8deg); transition: transform .6s ease; }
+
+    /* Artist photo */
+    .artist-photo {
+      width: 118px; height: 118px; flex-shrink: 0; overflow: hidden;
+    }
+    .artist-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+    .artist-photo-placeholder {
+      width:100%; height:100%; background:var(--rule);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .artist-initials { font-family:'Syne'; font-weight:800; font-size:2.2rem; color:var(--muted); }
+    .artist-photo-sub { font-family:'Fira Mono'; font-size:.52rem; color:var(--muted); margin-top:3px; }
+
+    /* ── SONG INFO ── */
+    .song-info { margin-bottom: 14px; }
+    #songTitle {
+      font-family:'Fraunces'; font-style:italic; font-weight:600; font-size:1.5rem;
+      color:var(--ink); line-height:1.15; margin-bottom:5px; letter-spacing:-.01em;
+    }
+    #artistName {
+      font-family:'Fira Sans Condensed'; font-weight:600; font-size:.82rem;
+      letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+    }
+    #songYear { font-family:'Fira Mono'; font-size:.66rem; color:var(--rule); margin-top:2px; }
+
+    /* ── WAVEFORM ── */
+    .waveform { display:flex; align-items:flex-end; gap:3px; height:30px; margin:10px 0; }
+    .wave-bar { width:3px; border-radius:1px; background:var(--indigo); height:5px; }
+    @keyframes wave-bounce { 0%,100%{height:4px} 50%{height:var(--wh,24px)} }
+    .waveform.playing .wave-bar { animation: wave-bounce .85s ease-in-out infinite; }
+    .waveform.playing .wave-bar:nth-child(1)  {--wh:14px;animation-delay:0s}
+    .waveform.playing .wave-bar:nth-child(2)  {--wh:22px;animation-delay:.07s}
+    .waveform.playing .wave-bar:nth-child(3)  {--wh:28px;animation-delay:.14s}
+    .waveform.playing .wave-bar:nth-child(4)  {--wh:16px;animation-delay:.21s}
+    .waveform.playing .wave-bar:nth-child(5)  {--wh:24px;animation-delay:.05s}
+    .waveform.playing .wave-bar:nth-child(6)  {--wh:10px;animation-delay:.12s}
+    .waveform.playing .wave-bar:nth-child(7)  {--wh:26px;animation-delay:.19s}
+    .waveform.playing .wave-bar:nth-child(8)  {--wh:18px;animation-delay:.26s}
+    .waveform.playing .wave-bar:nth-child(9)  {--wh:28px;animation-delay:.03s}
+    .waveform.playing .wave-bar:nth-child(10) {--wh:12px;animation-delay:.10s}
+    .waveform.playing .wave-bar:nth-child(11) {--wh:20px;animation-delay:.17s}
+    .waveform.playing .wave-bar:nth-child(12) {--wh:8px;animation-delay:.24s}
+    .waveform.playing .wave-bar:nth-child(13) {--wh:24px;animation-delay:.31s}
+    .waveform.playing .wave-bar:nth-child(14) {--wh:16px;animation-delay:.08s}
+
+    /* ── CONTROLS ROW (play + volume on same row) ── */
+    .controls-row { display:flex; align-items:center; gap:16px; margin:12px 0 8px; }
+    #playBtn {
+      width:52px; height:52px; border-radius:50%; flex-shrink:0;
+      background:var(--indigo); color:#fff; border:none; cursor:pointer;
+      font-size:1.15rem; display:flex; align-items:center; justify-content:center;
+      transition:background .15s, transform .1s;
+    }
+    #playBtn:hover { background:var(--indigo-lt); }
+    #playBtn:active { transform:scale(.94); }
+    .volume-row { display:flex; align-items:center; gap:7px; flex:1; }
+    #speakerIcon { font-size:.82rem; }
+    #speakerIcon.dim { opacity:.4; }
+    #volSlider {
+      flex:1; -webkit-appearance:none; height:3px; outline:none; cursor:pointer;
+    }
+    #volSlider::-webkit-slider-thumb {
+      -webkit-appearance:none; width:12px; height:12px;
+      border-radius:50%; background:var(--indigo); cursor:pointer;
+    }
+    #volPct { font-family:'Fira Mono'; font-size:.6rem; color:var(--muted); min-width:34px; text-align:right; }
+
+    /* ── VIDEO BTN ── */
+    .video-btn-row { margin-bottom:8px; min-height:26px; }
+    #videoBtn {
+      background:transparent; border:none; border-bottom:2px solid var(--indigo);
+      color:var(--indigo); font-family:'Fira Sans Condensed'; font-weight:600; font-size:.8rem;
+      padding:3px 0; cursor:pointer; letter-spacing:.04em; transition:opacity .15s;
+    }
+    #videoBtn:hover { opacity:.7; }
+
+    /* ── DIVIDER ── */
+    .divider { border:none; border-top:1px solid var(--rule); margin:12px 0; }
+
+    /* ── RATING ── */
+    .rating-section { display:flex; align-items:center; gap:18px; margin-bottom:12px; }
+    .rating-label { font-family:'Fira Mono'; font-size:.58rem; color:var(--muted); flex:1; }
+    .rating-btns { display:flex; gap:10px; }
+    .thumb-btn {
+      background:transparent; border:none; color:var(--ink);
+      font-size:1.1rem; padding:4px 6px; cursor:pointer;
+      display:flex; align-items:center; gap:4px; transition:opacity .15s;
+    }
+    .thumb-btn:hover { opacity:.7; }
+    .thumb-btn.voted-up   { color:var(--green-up); }
+    .thumb-btn.voted-down { color:var(--red-down); }
+    .vote-count { font-family:'Fira Mono'; font-size:.6rem; color:var(--indigo); }
+    .vote-count:not(.show) { display:none; }
+
+    /* ── STATUS / FOOTER ── */
+    .status-bar { font-family:'Fira Mono'; font-size:.62rem; color:var(--muted); margin-bottom:6px; }
+    .card-footer { font-family:'Fira Mono'; font-size:.52rem; color:var(--rule); margin-top:8px; border-top:1px solid var(--rule); padding-top:9px; }
+
+    /* ── COUNTDOWN ── */
+    .countdown-section { }
+    .countdown-header { margin-bottom:18px; }
+    .countdown-eyebrow { font-family:'Fira Sans Condensed'; font-size:.65rem; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:2px; }
+    .countdown-title { font-family:'Syne'; font-weight:800; font-size:3rem; color:var(--ink); line-height:.9; display:block; }
+    .countdown-title-lo { font-family:'Fira Sans Condensed'; font-size:.65rem; color:var(--muted); letter-spacing:.2em; text-transform:uppercase; display:block; margin-top:6px; }
+
+    /* Year buttons — ghost underline */
+    .year-btns { display:flex; flex-wrap:wrap; gap:2px; margin-bottom:26px; border-bottom:1px solid var(--rule); padding-bottom:14px; }
+    .year-btn {
+      background:transparent; border:none; border-bottom:2px solid transparent;
+      color:var(--muted); font-family:'Syne'; font-weight:700; font-size:.98rem;
+      padding:4px 8px 5px; cursor:pointer; margin-bottom:-1px;
+      transition:color .12s, border-color .12s;
+    }
+    .year-btn:hover { color:var(--ink); }
+    .year-btn.active { border-bottom-color:var(--indigo); color:var(--ink); }
+
+    /* Table year bar as left sidebar */
+    .table-wrap { display:none; }
+    .table-wrap.visible { display:block; }
+    .table-year-bar { display:grid; grid-template-columns:80px 1fr; gap:14px; align-items:start; margin-bottom:18px; }
+    .table-year-num { font-family:'Syne'; font-weight:800; font-size:4rem; color:var(--indigo); line-height:1; }
+    .table-year-label { font-family:'Fira Mono'; font-size:.58rem; color:var(--muted); padding-top:8px; }
+
+    /* Table */
+    .countdown-table { width:100%; border-collapse:collapse; }
+    .countdown-table thead tr { border-bottom:2px solid var(--ink); }
+    .countdown-table th {
+      font-family:'Fira Sans Condensed'; font-size:.65rem; font-weight:600;
+      letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+      padding:6px 10px 8px; text-align:left;
+    }
+    .countdown-table th.col-rank { text-align:center; width:48px; }
+    .countdown-table th.col-riaa { text-align:center; }
+    .countdown-table tbody tr { border-bottom:1px solid var(--rule); cursor:pointer; transition:background .1s; }
+    .countdown-table tbody tr:hover { background:rgba(45,31,255,.04); }
+    .countdown-table tbody tr.row-selected { background:rgba(45,31,255,.06); border-left:3px solid var(--indigo); }
+    .countdown-table td { padding:10px; vertical-align:middle; }
+    .col-rank { text-align:center; }
+    .rank-badge { font-family:'Syne'; font-weight:800; font-size:.98rem; }
+    .rank-1    { color:var(--indigo); font-size:1.08rem; }
+    .rank-2, .rank-3 { color:var(--ink); }
+    .rank-other { color:var(--muted); font-size:.82rem; font-family:'Fira Mono'; }
+    .td-artist { font-family:'Fira Sans Condensed'; font-weight:600; font-size:.92rem; color:var(--ink); }
+    .td-song { font-family:'Fraunces'; font-style:italic; font-weight:300; font-size:.85rem; color:var(--muted); }
+    .td-riaa { text-align:center; }
+    .riaa-badge { font-family:'Fira Mono'; font-size:.6rem; color:var(--indigo); }
+    .riaa-none  { font-family:'Fira Mono'; font-size:.6rem; color:var(--rule); }
+    .profile-link { color:var(--indigo); text-decoration:none; font-size:.62rem; margin-left:4px; opacity:.6; }
+    .profile-link:hover { opacity:1; }
+
+    /* ── VIDEO MODAL ── */
+    .video-modal { display:none; position:fixed; inset:0; background:rgba(10,10,20,.86); z-index:1000; align-items:center; justify-content:center; }
+    .video-modal.open { display:flex; }
+    .video-modal-inner { background:var(--surface); padding:24px; position:relative; border-left:6px solid var(--indigo); box-shadow:0 24px 80px rgba(0,0,0,.25); max-width:480px; width:90%; }
+    .video-modal-close { position:absolute; top:8px; right:12px; background:none; border:none; font-size:.95rem; color:var(--muted); cursor:pointer; font-family:'Fira Mono'; }
+    .video-modal-label { font-family:'Fira Mono'; font-size:.58rem; color:var(--muted); margin-bottom:10px; }
+    #videoPlayer { width:100%; display:block; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      body { padding: 20px 14px 44px; }
+      .station-numeral { font-size: 3.5rem; }
+      .card { border-left-width: 4px; padding: 24px 18px 18px; }
+      .cd { width: 118px; height: 118px; }
+      .artist-photo { width: 96px; height: 96px; }
+    }
+    @media (max-width: 360px) {
+      .media-row { flex-direction: column; align-items: flex-start; }
+      .countdown-table th.col-riaa, .countdown-table td.td-riaa { display: none; }
+      .year-btn { font-size:.86rem; padding:4px 5px; }
+      .table-year-num { font-size: 3rem; }
+    }
