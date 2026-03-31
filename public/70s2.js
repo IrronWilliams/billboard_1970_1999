@@ -1279,13 +1279,18 @@ async function fetchItunesVideo(artist, song) {
     return data.results || [];
   }
   try {
-    const byArtist = await searchVideos(artist, 25);
+    const [r1, r2, r3] = await Promise.allSettled([
+      searchVideos(artist, 25),
+      searchVideos(artist + ' ' + song, 10),
+      searchVideos(song, 15)
+    ]);
+    const byArtist   = r1.status === 'fulfilled' ? r1.value : [];
+    const byCombined = r2.status === 'fulfilled' ? r2.value : [];
+    const bySong     = r3.status === 'fulfilled' ? r3.value : [];
     const hit1 = byArtist.find(r => r.previewUrl && songMatch(r.trackName));
     if (hit1) return hit1.previewUrl;
-    const byCombined = await searchVideos(artist + ' ' + song, 10);
     const hit2 = byCombined.find(r => r.previewUrl && songMatch(r.trackName) && artistMatch(r.artistName));
     if (hit2) return hit2.previewUrl;
-    const bySong = await searchVideos(song, 15);
     const hit3 = bySong.find(r => r.previewUrl && artistMatch(r.artistName));
     if (hit3) return hit3.previewUrl;
     return null;

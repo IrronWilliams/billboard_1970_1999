@@ -45,6 +45,8 @@ public/          Static files baked into nginx at build time (HTML, CSS, JS, ima
                  (Links from 70s2/80s2/90s2 go to artist2.html, not artist.html)
   billboard70_99.html  Landing page — Dark Editorial Magazine aesthetic; decade facts, iTunes artist image grids,
                  one hit wonders, dominant artists; links to 70s2/80s2/90s2 and artist2.html
+  billboard70_99.css   Styles for landing page (extracted from inline <style> for independent caching)
+  billboard70_99.js    JavaScript for landing page (extracted from inline <script> for independent caching)
 scripts/         One-off utility scripts
   gen_pages.py   Regenerates 70s2/80s2/90s2/artist2 files from source JS; run with `python3 scripts/gen_pages.py`
                  Outputs separate .html, .css, and .js files for each v2 decade page

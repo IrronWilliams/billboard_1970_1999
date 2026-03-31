@@ -1280,21 +1280,20 @@ async function fetchItunesVideo(artist, song) {
     return a.includes(n) || n.includes(a);
   }
   try {
-    // 1. Artist-only search — find result whose track name matches the song
-    const byArtist = await searchVideos(artist, 25);
+    const [r1, r2, r3] = await Promise.allSettled([
+      searchVideos(artist, 25),
+      searchVideos(artist + ' ' + song, 10),
+      searchVideos(song, 15)
+    ]);
+    const byArtist   = r1.status === 'fulfilled' ? r1.value : [];
+    const byCombined = r2.status === 'fulfilled' ? r2.value : [];
+    const bySong     = r3.status === 'fulfilled' ? r3.value : [];
     const hit1 = byArtist.find(r => r.previewUrl && songMatch(r.trackName));
     if (hit1) return hit1.previewUrl;
-
-    // 2. Combined artist + song search — validate both song title AND artist
-    const byCombined = await searchVideos(artist + ' ' + song, 10);
     const hit2 = byCombined.find(r => r.previewUrl && songMatch(r.trackName) && artistMatch(r.artistName));
     if (hit2) return hit2.previewUrl;
-
-    // 3. Song-only search — validate artist name overlaps with ours
-    const bySong = await searchVideos(song, 15);
     const hit3 = bySong.find(r => r.previewUrl && artistMatch(r.artistName));
     if (hit3) return hit3.previewUrl;
-
     return null;
   } catch { return null; }
 }
