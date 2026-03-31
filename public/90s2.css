@@ -261,6 +261,15 @@
     .video-modal-label { font-family:'Fira Mono'; font-size:.58rem; color:var(--muted); margin-bottom:10px; }
     #videoPlayer { width:100%; display:block; }
 
+    /* ── BACK NAV ── */
+    .back-nav { width: 100%; max-width: 480px; margin: 0 auto 12px; }
+    .back-btn {
+      font-family: 'Fira Mono'; font-size: .72rem; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--indigo); text-decoration: none;
+      opacity: .8; transition: opacity .15s;
+    }
+    .back-btn:hover { opacity: 1; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 480px) {
       body { padding: 20px 14px 44px; }

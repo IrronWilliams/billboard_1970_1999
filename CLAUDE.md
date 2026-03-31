@@ -218,7 +218,7 @@ Two one-time data scripts live at `~/ProjectNotes/billboard_1970_1999_notes/`:
 | iTunes video preview modal (all decades) | ✅ Done | `▶ Video` button appears when iTunes has a video clip; opens 30-sec MP4 in modal; audio pauses while modal is open; modal themed per era |
 | Player reset on year change (all decades) | ✅ Done | `resetPlayer()` clears all fields and stops audio when a year button is clicked |
 | Song rating (thumbs up / down) | ✅ Done | IP-based persistence via PostgreSQL; GET/POST/DELETE `/api/ratings`; aggregate counts + userVote fetched on song select; toggle/switch supported |
-| Redesigned decade players (v2) | ✅ Done | `public/70s2.html/css/js`, `80s2.html/css/js`, `90s2.html/css/js` — separate HTML/CSS/JS per page, distinctive era aesthetics, all original functionality preserved; regenerate via `python3 scripts/gen_pages.py` |
+| Redesigned decade players (v2) | ✅ Done | `public/70s2.html/css/js`, `80s2.html/css/js`, `90s2.html/css/js` — separate HTML/CSS/JS per page, distinctive era aesthetics, all original functionality preserved; `← All Decades` back button links to landing page; regenerate via `python3 scripts/gen_pages.py` |
 | Redesigned artist profile (v2) | ✅ Done | `public/artist2.html` — Dark Editorial/Art Deco Newspaper aesthetic; linked from v2 decade pages |
 | Landing page | ✅ Done | `public/billboard70_99.html` — Dark Editorial Magazine aesthetic; hero with iTunes artist image wall, decade chapters with facts + artist grids, one hit wonders, dominant artists; links to all v2 pages |
 | Song lyrics display | 🔲 Planned | |

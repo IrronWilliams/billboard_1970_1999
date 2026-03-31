@@ -419,6 +419,15 @@ CSS_70S = """
     .video-modal-label { font-family: Teko; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-ink); margin-bottom: 10px; }
     #videoPlayer { width: 100%; display: block; }
 
+    /* ── BACK NAV ── */
+    .back-nav { width: 100%; max-width: 420px; margin: 0 auto 12px; }
+    .back-btn {
+      font-family: Teko; font-size: .85rem; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--gold); text-decoration: none;
+      opacity: .8; transition: opacity .15s;
+    }
+    .back-btn:hover { opacity: 1; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 480px) {
       body { padding: 16px 12px 40px; }
@@ -437,6 +446,7 @@ CSS_70S = """
 """
 
 HTML_BODY_70S = """<div class="page-wrap">
+  <div class="back-nav"><a href="billboard70_99.html" class="back-btn">&#8592; All Decades</a></div>
   <div class="card">
     <div class="live-badge"><div class="live-dot"></div>LIVE</div>
     <div class="station">
@@ -834,6 +844,15 @@ CSS_80S = """
     .video-modal-label { font-family:'Share Tech Mono'; font-size:.58rem; color:var(--dim); margin-bottom:10px; letter-spacing:.04em; }
     #videoPlayer { width:100%; display:block; }
 
+    /* ── BACK NAV ── */
+    .back-nav { width: 100%; max-width: 420px; margin: 0 auto 10px; }
+    .back-btn {
+      font-family: 'Barlow Condensed'; font-size: .8rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--cyan); text-decoration: none;
+      opacity: .8; transition: opacity .15s;
+    }
+    .back-btn:hover { opacity: 1; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 480px) {
       body { padding: 10px 8px 40px; }
@@ -847,6 +866,7 @@ CSS_80S = """
 """
 
 HTML_BODY_80S = """<div class="page-wrap">
+  <div class="back-nav"><a href="billboard70_99.html" class="back-btn">&#8592; All Decades</a></div>
   <div class="card">
     <div class="card-header">
       <div class="station-name">
@@ -1221,6 +1241,15 @@ CSS_90S = """
     .video-modal-label { font-family:'Fira Mono'; font-size:.58rem; color:var(--muted); margin-bottom:10px; }
     #videoPlayer { width:100%; display:block; }
 
+    /* ── BACK NAV ── */
+    .back-nav { width: 100%; max-width: 480px; margin: 0 auto 12px; }
+    .back-btn {
+      font-family: 'Fira Mono'; font-size: .72rem; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--indigo); text-decoration: none;
+      opacity: .8; transition: opacity .15s;
+    }
+    .back-btn:hover { opacity: 1; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 480px) {
       body { padding: 20px 14px 44px; }
@@ -1238,6 +1267,7 @@ CSS_90S = """
 """
 
 HTML_BODY_90S = """<div class="page-wrap">
+  <div class="back-nav"><a href="billboard70_99.html" class="back-btn">&#8592; All Decades</a></div>
   <div class="card">
     <div class="live-badge"><div class="live-dot"></div>Live</div>
     <div class="station">
