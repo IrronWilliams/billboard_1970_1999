@@ -467,7 +467,7 @@ const BILLBOARD = {
     { pos: 91, artist:'Yes', song:'Roundabout', riaa:'—' },
     { pos: 92, artist:'Jackson Browne', song:'Doctor My Eyes', riaa:'—' },
     { pos: 93, artist:'New Seekers', song:'I\'d Like To Teach The World To Sing', riaa:'—' },
-    { pos: 94, artist:'Don Mclean', song:'Vincent / Castles In The Air', riaa:'—' },
+    { pos: 94, artist:'Don McLean', song:'Vincent / Castles In The Air', riaa:'—' },
     { pos: 95, artist:'Detroit Emeralds', song:'Baby Let Me Take You (In My Arms)', riaa:'—' },
     { pos: 96, artist:'Rick Springfield', song:'Speak To The Sky', riaa:'—' },
     { pos: 97, artist:'Hillside Singers', song:'I\'d Like To Teach The World To Sing', riaa:'—' },

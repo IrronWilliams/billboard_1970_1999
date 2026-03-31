@@ -1,6 +1,26 @@
-const express = require('express');
-const router  = express.Router();
-const pool    = require('../ratingsDb');
+const express    = require('express');
+const router     = express.Router();
+const pool       = require('../ratingsDb');
+const rateLimit  = require('express-rate-limit');
+
+// Skip rate limiting in test environment so Jest suites are unaffected
+const skipInTest = () => process.env.NODE_ENV === 'test';
+
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: skipInTest,
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: skipInTest,
+});
 
 function getClientIp(req) {
   return req.headers['x-real-ip']
@@ -27,7 +47,7 @@ async function getAggregates(song, artist, ip) {
 }
 
 // GET /api/ratings?song=...&artist=...
-router.get('/', async (req, res) => {
+router.get('/', readLimiter, async (req, res) => {
   const { song, artist } = req.query;
   if (!song || !artist) return res.status(400).json({ error: 'song and artist required' });
   const ip = getClientIp(req);
@@ -40,7 +60,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/ratings — cast or switch vote (upsert)
-router.post('/', async (req, res) => {
+router.post('/', writeLimiter, async (req, res) => {
   const { song, artist, year, decade, vote } = req.body;
   if (!song || !artist || !year || !vote) {
     return res.status(400).json({ error: 'song, artist, year, and vote required' });
@@ -66,7 +86,7 @@ router.post('/', async (req, res) => {
 });
 
 // DELETE /api/ratings?song=...&artist=...
-router.delete('/', async (req, res) => {
+router.delete('/', writeLimiter, async (req, res) => {
   const { song, artist } = req.query;
   if (!song || !artist) return res.status(400).json({ error: 'song and artist required' });
   const ip = getClientIp(req);

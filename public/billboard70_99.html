@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Billboard Archive — 1970–1999</title>
+  <link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:      #08090D;
+      --surface:    #0E1018;
+      --surface-2:  #141620;
+      --border:     rgba(255,255,255,0.07);
+      --cream:      #F2EAD6;
+      --cream-dim:  #716A5E;
+      --70s:        #C8850A;
+      --70s-hi:     #F5C228;
+      --70s-bg:     #100C04;
+      --80s:        #E0145A;
+      --80s-hi:     #FF5A96;
+      --80s-accent: #00E5C4;
+      --80s-bg:     #10040A;
+      --90s:        #0ABFAA;
+      --90s-hi:     #6FFFF0;
+      --90s-bg:     #030F0E;
+      --display:    'Yeseva One', serif;
+      --condensed:  'Barlow Condensed', sans-serif;
+      --body:       'Crimson Pro', serif;
+      --mono:       'Space Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--cream);
+      font-family: var(--body);
+      font-size: 18px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ── HERO ─────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 140px 24px 60px;
+    }
+
+    .hero-wall {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 2px;
+    }
+
+    .hero-cell {
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .hero-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.35);
+      opacity: 0;
+      transform: scale(1.08);
+      transition: opacity 1s ease, transform 9s ease;
+    }
+
+    .hero-cell img.in {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 55% 65% at 50% 48%, rgba(8,9,13,0.93) 0%, rgba(8,9,13,0.62) 55%, rgba(8,9,13,0.15) 100%),
+        linear-gradient(to bottom, rgba(8,9,13,0.75) 0%, transparent 20%, transparent 70%, rgba(8,9,13,0.95) 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 960px;
+      width: 100%;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: riseIn 0.9s 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+
+    .hero-title {
+      font-family: var(--display);
+      font-size: clamp(3.2rem, 9vw, 8rem);
+      line-height: 0.92;
+      color: var(--cream);
+      letter-spacing: -0.01em;
+      opacity: 0;
+      animation: riseIn 1s 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+
+    .hero-years {
+      display: block;
+      font-family: var(--condensed);
+      font-weight: 900;
+      font-size: clamp(4.5rem, 18vw, 16rem);
+      letter-spacing: -0.04em;
+      line-height: 0.82;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(242,234,214,0.18);
+      margin: 4px 0 8px;
+    }
+
+    .hero-sub {
+      font-family: var(--body);
+      font-style: italic;
+      font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+      color: var(--cream-dim);
+      max-width: 520px;
+      margin: 20px auto 0;
+      opacity: 0;
+      animation: riseIn 1s 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+
+    .hero-portals {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 14px;
+      margin-top: 64px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: riseIn 1s 1.2s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+
+    .portal {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 22px 28px 18px;
+      border: 1px solid;
+      text-decoration: none;
+      min-width: 190px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.22s ease;
+    }
+
+    .portal::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.22s ease;
+    }
+
+    .portal:hover { transform: translateY(-5px); }
+    .portal:hover::before { opacity: 0.1; }
+
+    .p70 { border-color: rgba(200,133,10,0.55); }
+    .p70::before { background: var(--70s); }
+    .p80 { border-color: rgba(224,20,90,0.55); }
+    .p80::before { background: var(--80s); }
+    .p90 { border-color: rgba(10,191,170,0.55); }
+    .p90::before { background: var(--90s); }
+
+    .portal-era {
+      font-family: var(--mono);
+      font-size: 0.55rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .p70 .portal-era { color: var(--70s); }
+    .p80 .portal-era { color: var(--80s); }
+    .p90 .portal-era { color: var(--90s); }
+
+    .portal-name {
+      font-family: var(--condensed);
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--cream);
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .portal-cta {
+      font-family: var(--condensed);
+      font-weight: 300;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .portal-cta .arr { transition: transform 0.2s ease; display: inline-block; }
+    .portal:hover .portal-cta .arr { transform: translateX(5px); }
+
+    /* ── STATS STRIP ──────────────────────────────────── */
+    .stats-strip {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 44px 24px;
+    }
+
+    .stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 0 16px;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: var(--condensed);
+      font-weight: 900;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      line-height: 1;
+      color: var(--cream);
+      letter-spacing: -0.02em;
+    }
+
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      margin-top: 7px;
+    }
+
+    /* ── CHAPTER SHARED ───────────────────────────────── */
+    .chapter { overflow: hidden; }
+
+    .chapter-banner {
+      position: relative;
+      padding: 90px 48px 70px;
+      overflow: hidden;
+    }
+
+    .c70 .chapter-banner { background: linear-gradient(145deg, var(--70s-bg) 0%, #1C1400 100%); }
+    .c80 .chapter-banner { background: linear-gradient(145deg, var(--80s-bg) 0%, #180A22 100%); }
+    .c90 .chapter-banner { background: linear-gradient(145deg, var(--90s-bg) 0%, #041412 100%); }
+
+    .chapter-num-bg {
+      position: absolute;
+      right: -10px;
+      bottom: -60px;
+      font-family: var(--condensed);
+      font-weight: 900;
+      font-size: clamp(10rem, 24vw, 22rem);
+      line-height: 0.78;
+      letter-spacing: -0.06em;
+      opacity: 0.055;
+      color: white;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .chapter-banner-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .chapter-tag {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .c70 .chapter-tag { color: var(--70s); }
+    .c80 .chapter-tag { color: var(--80s); }
+    .c90 .chapter-tag { color: var(--90s); }
+
+    .chapter-title {
+      font-family: var(--display);
+      font-size: clamp(2.8rem, 7.5vw, 6.5rem);
+      line-height: 0.9;
+      color: var(--cream);
+    }
+
+    .chapter-range {
+      font-family: var(--condensed);
+      font-weight: 300;
+      font-size: clamp(0.9rem, 1.8vw, 1.25rem);
+      letter-spacing: 0.1em;
+      color: var(--cream-dim);
+      margin-top: 14px;
+    }
+
+    .enter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 30px;
+      font-family: var(--condensed);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--black);
+      transition: transform 0.2s ease, filter 0.2s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .c70 .enter-btn { background: var(--70s); }
+    .c80 .enter-btn { background: var(--80s); }
+    .c90 .enter-btn { background: var(--90s); }
+
+    .enter-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+    .enter-btn .arr { transition: transform 0.2s ease; display: inline-block; }
+    .enter-btn:hover .arr { transform: translateX(5px); }
+
+    /* Chapter body */
+    .chapter-body {
+      padding: 64px 48px 72px;
+      max-width: 1296px;
+      margin: 0 auto;
+    }
+
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.45fr;
+      gap: 64px;
+      align-items: start;
+    }
+
+    .chapter-grid.flip { }
+
+    /* Facts */
+    .facts-heading, .artists-heading {
+      font-family: var(--condensed);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 30px;
+    }
+
+    .fact-item {
+      margin-bottom: 26px;
+      padding-left: 18px;
+      border-left: 2px solid var(--border);
+      opacity: 0;
+      transform: translateX(-14px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    .fact-item.in { opacity: 1; transform: translateX(0); }
+    .fact-item:nth-child(2) { transition-delay: 0.07s; }
+    .fact-item:nth-child(3) { transition-delay: 0.14s; }
+    .fact-item:nth-child(4) { transition-delay: 0.21s; }
+    .fact-item:nth-child(5) { transition-delay: 0.28s; }
+
+    .c70 .fact-item { border-left-color: rgba(200,133,10,0.35); }
+    .c80 .fact-item { border-left-color: rgba(224,20,90,0.35); }
+    .c90 .fact-item { border-left-color: rgba(10,191,170,0.35); }
+
+    .fact-text {
+      font-family: var(--body);
+      font-size: 0.94rem;
+      line-height: 1.65;
+      color: rgba(242,234,214,0.82);
+    }
+
+    .fact-text strong { font-weight: 600; }
+    .c70 .fact-text strong { color: var(--70s-hi); }
+    .c80 .fact-text strong { color: var(--80s-hi); }
+    .c90 .fact-text strong { color: var(--90s-hi); }
+
+    .pull-quote {
+      font-family: var(--body);
+      font-style: italic;
+      font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+      line-height: 1.45;
+      color: var(--cream);
+      margin: 36px 0 0;
+      padding: 22px 28px 22px 36px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .pull-quote.in { opacity: 1; transform: translateY(0); }
+
+    .pull-quote::before {
+      content: '\201C';
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      font-family: var(--display);
+      font-style: normal;
+      font-size: 5.5rem;
+      line-height: 1;
+      opacity: 0.1;
+      color: var(--cream);
+    }
+
+    /* Artist grid */
+    .artist-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .a-card {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--surface);
+      opacity: 0;
+      transform: scale(0.94);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .a-card.in { opacity: 1; transform: scale(1); }
+    .a-card:nth-child(2) { transition-delay: 0.06s; }
+    .a-card:nth-child(3) { transition-delay: 0.12s; }
+    .a-card:nth-child(4) { transition-delay: 0.18s; }
+    .a-card:nth-child(5) { transition-delay: 0.24s; }
+    .a-card:nth-child(6) { transition-delay: 0.30s; }
+    .a-card:nth-child(7) { transition-delay: 0.36s; }
+    .a-card:nth-child(8) { transition-delay: 0.42s; }
+
+    .a-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(25%);
+      transition: transform 0.5s ease, filter 0.3s ease;
+    }
+
+    .a-card:hover img { transform: scale(1.09); filter: grayscale(0%); }
+
+    .a-card-shade {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 26px 8px 8px;
+      background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%);
+    }
+
+    .a-card-name {
+      font-family: var(--condensed);
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1.15;
+    }
+
+    .a-card-init {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--condensed);
+      font-weight: 900;
+      font-size: 2.2rem;
+      letter-spacing: -0.02em;
+      color: rgba(255,255,255,0.14);
+    }
+
+    /* Trend bar */
+    .trend-bar {
+      margin-top: 44px;
+      padding: 26px 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.6s 0.2s ease, transform 0.6s 0.2s ease;
+    }
+
+    .trend-bar.in { opacity: 1; transform: translateY(0); }
+
+    .trend-lhs { flex-shrink: 0; }
+
+    .trend-badge {
+      font-family: var(--mono);
+      font-size: 0.52rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      color: var(--black);
+      display: inline-block;
+      margin-bottom: 9px;
+    }
+
+    .c70 .trend-badge { background: var(--70s); }
+    .c80 .trend-badge { background: var(--80s); }
+    .c90 .trend-badge { background: var(--90s); }
+
+    .trend-title {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+
+    .trend-div {
+      width: 1px;
+      height: 56px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .trend-desc {
+      font-family: var(--body);
+      font-size: 0.92rem;
+      color: var(--cream-dim);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    /* ── ONE HIT WONDERS ──────────────────────────────── */
+    .wonders {
+      padding: 88px 48px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    .wonders-inner { max-width: 1200px; margin: 0 auto; }
+
+    .sec-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      margin-bottom: 10px;
+    }
+
+    .sec-title {
+      font-family: var(--display);
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 0.93;
+      color: var(--cream);
+      margin-bottom: 52px;
+    }
+
+    .wonders-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .w-card {
+      background: var(--black);
+      padding: 28px 26px;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .w-card.in { opacity: 1; transform: translateY(0); }
+    .w-card:nth-child(2) { transition-delay: 0.08s; }
+    .w-card:nth-child(3) { transition-delay: 0.16s; }
+    .w-card:nth-child(4) { transition-delay: 0.24s; }
+    .w-card:nth-child(5) { transition-delay: 0.32s; }
+    .w-card:nth-child(6) { transition-delay: 0.40s; }
+
+    .w-era {
+      font-family: var(--mono);
+      font-size: 0.53rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
+    .w-era-70 { background: rgba(200,133,10,0.14); color: var(--70s-hi); }
+    .w-era-80 { background: rgba(224,20,90,0.14); color: var(--80s-hi); }
+    .w-era-90 { background: rgba(10,191,170,0.14); color: var(--90s-hi); }
+
+    .w-song {
+      font-family: var(--display);
+      font-size: 1.08rem;
+      color: var(--cream);
+      margin-bottom: 3px;
+    }
+
+    .w-artist {
+      font-family: var(--condensed);
+      font-weight: 400;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      color: var(--cream-dim);
+      margin-bottom: 14px;
+    }
+
+    .w-fact {
+      font-family: var(--body);
+      font-size: 0.88rem;
+      line-height: 1.62;
+      color: rgba(242,234,214,0.58);
+    }
+
+    /* ── DOMINANT ARTISTS ─────────────────────────────── */
+    .dominants {
+      padding: 80px 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .dominants-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .dom-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 48px;
+    }
+
+    .dom-col {
+      background: var(--black);
+      padding: 32px 28px;
+    }
+
+    .dom-decade-label {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      margin-bottom: 22px;
+      display: inline-block;
+    }
+
+    .dom-col:nth-child(1) .dom-decade-label { background: rgba(200,133,10,0.14); color: var(--70s-hi); }
+    .dom-col:nth-child(2) .dom-decade-label { background: rgba(224,20,90,0.14); color: var(--80s-hi); }
+    .dom-col:nth-child(3) .dom-decade-label { background: rgba(10,191,170,0.14); color: var(--90s-hi); }
+
+    .dom-artist {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dom-artist:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .dom-rank {
+      font-family: var(--condensed);
+      font-weight: 900;
+      font-size: 2.2rem;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      opacity: 0.18;
+      color: var(--cream);
+      flex-shrink: 0;
+      width: 36px;
+    }
+
+    .dom-info {}
+
+    .dom-name {
+      font-family: var(--display);
+      font-size: 1.05rem;
+      color: var(--cream);
+      line-height: 1.1;
+    }
+
+    .dom-detail {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      color: var(--cream-dim);
+      margin-top: 4px;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 48px 44px;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 44px;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      font-family: var(--display);
+      font-size: 1.9rem;
+      color: var(--cream);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .footer-tagline {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+    }
+
+    .footer-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .fnav-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 18px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      font-family: var(--condensed);
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cream);
+      transition: border-color 0.2s ease;
+    }
+
+    .fnav-link:hover { border-color: rgba(242,234,214,0.35); }
+
+    .fnav-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .fnav-link:nth-child(1) .fnav-dot { background: var(--70s); }
+    .fnav-link:nth-child(2) .fnav-dot { background: var(--80s); }
+    .fnav-link:nth-child(3) .fnav-dot { background: var(--90s); }
+    .fnav-link:nth-child(4) .fnav-dot { background: var(--cream-dim); }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-legal {
+      font-family: var(--mono);
+      font-size: 0.53rem;
+      letter-spacing: 0.09em;
+      color: var(--cream-dim);
+      opacity: 0.45;
+    }
+
+    /* ── ANIMATIONS ───────────────────────────────────── */
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────────── */
+    @media (max-width: 960px) {
+      .chapter-grid { grid-template-columns: 1fr; gap: 40px; }
+      .chapter-banner { padding: 70px 28px 55px; }
+      .chapter-body { padding: 48px 28px 60px; }
+      .stats-inner { grid-template-columns: repeat(2, 1fr); }
+      .stat-item:nth-child(2) { border-right: none; }
+      .stat-item:nth-child(3) { border-right: 1px solid var(--border); border-top: 1px solid var(--border); padding-top: 20px; }
+      .stat-item:nth-child(4) { border-right: none; border-top: 1px solid var(--border); padding-top: 20px; }
+      .wonders-grid { grid-template-columns: repeat(2, 1fr); }
+      .dom-grid { grid-template-columns: 1fr; }
+      .trend-bar { flex-direction: column; align-items: flex-start; }
+      .trend-div { width: 48px; height: 1px; }
+    }
+
+    @media (max-width: 640px) {
+      .hero { padding: 120px 20px 48px; }
+      .hero-portals { flex-direction: column; align-items: stretch; }
+      .portal { min-width: auto; }
+      .chapter-banner { padding: 55px 20px 45px; }
+      .chapter-body { padding: 40px 20px 50px; }
+      .wonders { padding: 60px 20px; }
+      .wonders-grid { grid-template-columns: 1fr; }
+      .dominants { padding: 60px 20px; }
+      .site-footer { padding: 48px 20px 32px; }
+      .artist-grid { gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-wall" id="heroWall"></div>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">Billboard Hot 100 &nbsp;&middot;&nbsp; The Definitive Archive</p>
+    <h1 class="hero-title">
+      The Billboard<br>Archive
+      <span class="hero-years">1970–1999</span>
+    </h1>
+    <p class="hero-sub">Thirty years. Three thousand songs. The music that made us who we are — charted, ranked, and ready to explore.</p>
+  </div>
+
+  <div class="hero-portals">
+    <a href="70s2.html" class="portal p70">
+      <span class="portal-era">1970 – 1979</span>
+      <span class="portal-name">Soul FM</span>
+      <span class="portal-cta">Enter the 70s <span class="arr">→</span></span>
+    </a>
+    <a href="80s2.html" class="portal p80">
+      <span class="portal-era">1980 – 1989</span>
+      <span class="portal-name">Power 80s</span>
+      <span class="portal-cta">Enter the 80s <span class="arr">→</span></span>
+    </a>
+    <a href="90s2.html" class="portal p90">
+      <span class="portal-era">1990 – 1999</span>
+      <span class="portal-name">Altitude 99</span>
+      <span class="portal-cta">Enter the 90s <span class="arr">→</span></span>
+    </a>
+  </div>
+</section>
+
+<!-- ── STATS ─────────────────────────────────────────────── -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num" data-target="30">0</div>
+      <div class="stat-label">Years Archived</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="2999">0</div>
+      <div class="stat-label">Chart Entries</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="1200" data-suffix="+">0</div>
+      <div class="stat-label">Unique Artists</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="100">0</div>
+      <div class="stat-label">Songs Per Year</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 70s ────────────────────────────────────────────────── -->
+<section class="chapter c70">
+  <div class="chapter-banner">
+    <div class="chapter-num-bg">70s</div>
+    <div class="chapter-banner-inner">
+      <div>
+        <p class="chapter-tag">Chapter 01 &nbsp;&middot;&nbsp; The Decade of Soul</p>
+        <h2 class="chapter-title">The Seventies</h2>
+        <p class="chapter-range">Billboard Hot 100 &middot; 1970 – 1979</p>
+      </div>
+      <a href="70s2.html" class="enter-btn">Enter Soul FM <span class="arr">→</span></a>
+    </div>
+  </div>
+
+  <div class="chapter-body">
+    <div class="chapter-grid">
+      <div class="facts-col">
+        <p class="facts-heading">Decade Highlights</p>
+        <div class="fact-item">
+          <p class="fact-text"><strong>Stevie Wonder's Classic Period</strong> — Between 1972 and 1976, Wonder released five consecutive masterworks: Music of My Mind, Talking Book, Innervisions, Fulfillingness' First Finale, and Songs in the Key of Life. Each won Album of the Year at the Grammys. Back to back to back to back to back.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>Le Freak by Chic (1978)</strong> became Atlantic Records' best-selling single of all time — born the night Nile Rodgers and Bernard Edwards were turned away at Studio 54's velvet rope. Rejection never sounded so good.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>Elton John</strong> placed 16 songs in the US Top 40 in 1975 alone — a single-year record that still stands. Seven consecutive #1 albums between 1972 and 1975. One extraordinary decade of excess.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>Disco's spectacular collapse:</strong> In 1979, six of the year's top 10 songs were disco. Then came Disco Demolition Night — July 12, Comiskey Park. A Chicago DJ destroyed 10,000 disco records at home plate. A riot followed. An era ended in one evening.</p>
+        </div>
+        <blockquote class="pull-quote">The 70s gave us Funk, Soul, Disco, Classic Rock, and Punk — all simultaneously. No decade before or since contained that much musical revolution in one ten-year span.</blockquote>
+      </div>
+
+      <div class="artists-col">
+        <p class="artists-heading">Defining Artists &mdash; click to explore</p>
+        <div class="artist-grid" id="ag-70s"></div>
+        <div class="trend-bar">
+          <div class="trend-lhs">
+            <span class="trend-badge">Defining Trend</span>
+            <div class="trend-title">The Rise<br>of Disco</div>
+          </div>
+          <div class="trend-div"></div>
+          <p class="trend-desc">What started as underground club culture in New York became the sound of a generation. Donna Summer, Gloria Gaynor, Chic, and the Bee Gees turned the dancefloor into the most important stage in music — until the backlash burned it down in a single night at Comiskey Park.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 80s ────────────────────────────────────────────────── -->
+<section class="chapter c80">
+  <div class="chapter-banner">
+    <div class="chapter-num-bg">80s</div>
+    <div class="chapter-banner-inner">
+      <div>
+        <p class="chapter-tag">Chapter 02 &nbsp;&middot;&nbsp; The MTV Generation</p>
+        <h2 class="chapter-title">The Eighties</h2>
+        <p class="chapter-range">Billboard Hot 100 &middot; 1980 – 1989</p>
+      </div>
+      <a href="80s2.html" class="enter-btn">Enter Power 80s <span class="arr">→</span></a>
+    </div>
+  </div>
+
+  <div class="chapter-body">
+    <div class="chapter-grid chapter-grid-flip">
+      <div class="artists-col">
+        <p class="artists-heading">Defining Artists &mdash; click to explore</p>
+        <div class="artist-grid" id="ag-80s"></div>
+        <div class="trend-bar">
+          <div class="trend-lhs">
+            <span class="trend-badge">Defining Trend</span>
+            <div class="trend-title">When MTV<br>Changed Music</div>
+          </div>
+          <div class="trend-div"></div>
+          <p class="trend-desc">August 1, 1981. MTV launched with "Video Killed the Radio Star." Within three years, how you looked was as important as how you sounded. Michael Jackson's "Thriller" didn't just sell records — it turned music into cinema.</p>
+        </div>
+      </div>
+
+      <div class="facts-col">
+        <p class="facts-heading">Decade Highlights</p>
+        <div class="fact-item">
+          <p class="fact-text"><strong>Thriller (1982)</strong> — Michael Jackson's masterpiece spent 37 weeks at #1, sold over 66 million copies worldwide, and produced seven top-10 singles from a single album. It remains the best-selling album in history. Some records exist to never be broken.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>Prince's "When Doves Cry" (1984)</strong> reached #1 with no bass line — an intentional, radical choice that made it the sound of the year. It was the best-selling US single of 1984. Prince played every instrument himself.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>"Don't You (Forget About Me)"</strong> was offered to — and rejected by — Bryan Ferry, David Bowie, and Billy Idol before Simple Minds recorded it reluctantly in two hours. It became their only US #1. The lesson: always say yes.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>Whitney Houston's debut (1985)</strong> produced three consecutive #1 singles — the first debut album in history to achieve that. She went on to become the most awarded female artist of all time, with 415 career accolades.</p>
+        </div>
+        <blockquote class="pull-quote">The 80s proved that image was everything — and then gave us artists whose talent was so overwhelming, the image became secondary anyway.</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 90s ────────────────────────────────────────────────── -->
+<section class="chapter c90">
+  <div class="chapter-banner">
+    <div class="chapter-num-bg">90s</div>
+    <div class="chapter-banner-inner">
+      <div>
+        <p class="chapter-tag">Chapter 03 &nbsp;&middot;&nbsp; The Last Analog Decade</p>
+        <h2 class="chapter-title">The Nineties</h2>
+        <p class="chapter-range">Billboard Hot 100 &middot; 1990 – 1999</p>
+      </div>
+      <a href="90s2.html" class="enter-btn">Enter Altitude 99 <span class="arr">→</span></a>
+    </div>
+  </div>
+
+  <div class="chapter-body">
+    <div class="chapter-grid">
+      <div class="facts-col">
+        <p class="facts-heading">Decade Highlights</p>
+        <div class="fact-item">
+          <p class="fact-text"><strong>"One Sweet Day" (1995)</strong> — Mariah Carey and Boyz II Men held #1 for 16 consecutive weeks, a record that stood untouched for 23 years. When it finally fell in 2019, it fell to Lil Nas X's "Old Town Road." A fitting heir.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>Nirvana's Nevermind (1992)</strong> knocked Michael Jackson's "Dangerous" off the #1 album spot. Rock's generation gap closed in a single week. The charts would never look quite the same again.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>TLC's CrazySexyCool (1994)</strong> became the best-selling R&amp;B album by a group in history — over 23 million copies worldwide. "Waterfalls" was the best-selling US single of 1995. The group sold 65 million records total.</p>
+        </div>
+        <div class="fact-item">
+          <p class="fact-text"><strong>The Spice Girls</strong> sold 85 million records in just six years, becoming the best-selling female group of all time. "Wannabe" reached #1 in 37 countries. They did it in platform shoes. In 1996. It still holds up.</p>
+        </div>
+        <blockquote class="pull-quote">The 90s were the last decade before the internet rewired everything. Every record sold was earned — in a store, in cash, with intention. The charts meant something different then.</blockquote>
+      </div>
+
+      <div class="artists-col">
+        <p class="artists-heading">Defining Artists &mdash; click to explore</p>
+        <div class="artist-grid" id="ag-90s"></div>
+        <div class="trend-bar">
+          <div class="trend-lhs">
+            <span class="trend-badge">Defining Trend</span>
+            <div class="trend-title">Grunge Meets<br>R&amp;B</div>
+          </div>
+          <div class="trend-div"></div>
+          <p class="trend-desc">Nirvana and Mariah Carey both at #1 in the same year. Hip-hop going platinum. Country going stadium. The Billboard chart had never — and has never since — reflected such genuine diversity of sound across a single decade.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ONE HIT WONDERS ────────────────────────────────────── -->
+<section class="wonders">
+  <div class="wonders-inner">
+    <p class="sec-eyebrow">A Different Kind of Fame</p>
+    <h2 class="sec-title">One Hit<br>Wonders</h2>
+
+    <div class="wonders-grid">
+      <div class="w-card">
+        <span class="w-era w-era-70">1974 &middot; 70s</span>
+        <div class="w-song">Kung Fu Fighting</div>
+        <div class="w-artist">Carl Douglas</div>
+        <p class="w-fact">Recorded as a B-side filler in 10 minutes at the end of a studio session. Sold 11 million copies worldwide. Spent three weeks at #1. Douglas never had another charting single. Those 10 minutes paid better than most entire careers.</p>
+      </div>
+      <div class="w-card">
+        <span class="w-era w-era-70">1979 &middot; 70s</span>
+        <div class="w-song">Escape (The Piña Colada Song)</div>
+        <div class="w-artist">Rupert Holmes</div>
+        <p class="w-fact">The last #1 single of the 1970s. A song about a man placing a personal ad to cheat on his girlfriend — who turns out to be his own girlfriend. Holmes called it "the only truly happy adultery song ever written." He had a point.</p>
+      </div>
+      <div class="w-card">
+        <span class="w-era w-era-80">1982 &middot; 80s</span>
+        <div class="w-song">Come On Eileen</div>
+        <div class="w-artist">Dexys Midnight Runners</div>
+        <p class="w-fact">#1 on both sides of the Atlantic simultaneously. Lead singer Kevin Rowland required the entire band to wear denim dungarees over bare skin for every performance, without exception. The band split two years later, never to chart again.</p>
+      </div>
+      <div class="w-card">
+        <span class="w-era w-era-80">1983 &middot; 80s</span>
+        <div class="w-song">99 Luftballons</div>
+        <div class="w-artist">Nena</div>
+        <p class="w-fact">A German anti-war anthem about 99 toy balloons triggering a nuclear war. #1 in 12 countries — in German. The English version was released and flopped. The original is still a fixture at every 80s night worldwide, four decades later.</p>
+      </div>
+      <div class="w-card">
+        <span class="w-era w-era-90">1992 &middot; 90s</span>
+        <div class="w-song">I'm Too Sexy</div>
+        <div class="w-artist">Right Said Fred</div>
+        <p class="w-fact">Recorded in a single day by two bald brothers from London on a shoestring budget. Reached #1 in 16 countries. "I'm too sexy for my shirt" entered the permanent cultural lexicon. A sample appeared in Taylor Swift's "Look What You Made Me Do" — 25 years later.</p>
+      </div>
+      <div class="w-card">
+        <span class="w-era w-era-90">1996 &middot; 90s</span>
+        <div class="w-song">Macarena</div>
+        <div class="w-artist">Los Del Rio</div>
+        <p class="w-fact">14 consecutive weeks at #1 — tied for the longest-running #1 of the decade. The two members of Los Del Rio were in their 40s when it was recorded. Their original contract meant they received a fraction of the royalties from the song that defined a summer.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MOST DOMINANT ARTISTS ──────────────────────────────── -->
+<section class="dominants">
+  <div class="dominants-inner">
+    <p class="sec-eyebrow">Dominance by Decade</p>
+    <h2 class="sec-title">Most Influential<br>Artists</h2>
+
+    <div class="dom-grid">
+      <div class="dom-col">
+        <span class="dom-decade-label">The Seventies</span>
+        <div class="dom-artist">
+          <div class="dom-rank">01</div>
+          <div class="dom-info">
+            <div class="dom-name">Elton John</div>
+            <div class="dom-detail">16 top-40 hits in 1975 alone &middot; 7 consecutive #1 albums</div>
+          </div>
+        </div>
+        <div class="dom-artist">
+          <div class="dom-rank">02</div>
+          <div class="dom-info">
+            <div class="dom-name">Stevie Wonder</div>
+            <div class="dom-detail">5 Grammy Album of the Year wins &middot; 1972–1976</div>
+          </div>
+        </div>
+        <div class="dom-artist">
+          <div class="dom-rank">03</div>
+          <div class="dom-info">
+            <div class="dom-name">The Bee Gees</div>
+            <div class="dom-detail">Wrote 6 consecutive #1 hits for other artists &middot; Defined disco</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dom-col">
+        <span class="dom-decade-label">The Eighties</span>
+        <div class="dom-artist">
+          <div class="dom-rank">01</div>
+          <div class="dom-info">
+            <div class="dom-name">Michael Jackson</div>
+            <div class="dom-detail">Thriller — best-selling album of all time &middot; 66M+ copies</div>
+          </div>
+        </div>
+        <div class="dom-artist">
+          <div class="dom-rank">02</div>
+          <div class="dom-info">
+            <div class="dom-name">Madonna</div>
+            <div class="dom-detail">37 weeks in the top 40 in 1986 &middot; 12 top-5 hits in the decade</div>
+          </div>
+        </div>
+        <div class="dom-artist">
+          <div class="dom-rank">03</div>
+          <div class="dom-info">
+            <div class="dom-name">Prince</div>
+            <div class="dom-detail">"When Doves Cry" — best-selling US single of 1984 &middot; No bass line</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dom-col">
+        <span class="dom-decade-label">The Nineties</span>
+        <div class="dom-artist">
+          <div class="dom-rank">01</div>
+          <div class="dom-info">
+            <div class="dom-name">Mariah Carey</div>
+            <div class="dom-detail">"One Sweet Day" — 16 weeks at #1 &middot; Record held 23 years</div>
+          </div>
+        </div>
+        <div class="dom-artist">
+          <div class="dom-rank">02</div>
+          <div class="dom-info">
+            <div class="dom-name">Whitney Houston</div>
+            <div class="dom-detail">Most awarded female artist &middot; 415 career accolades</div>
+          </div>
+        </div>
+        <div class="dom-artist">
+          <div class="dom-rank">03</div>
+          <div class="dom-info">
+            <div class="dom-name">TLC</div>
+            <div class="dom-detail">CrazySexyCool — best-selling R&amp;B group album in history</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">The Billboard Archive</div>
+        <div class="footer-tagline">1970 – 1999 &nbsp;&middot;&nbsp; 30 Years of Sound</div>
+      </div>
+      <nav class="footer-nav">
+        <a href="70s2.html"    class="fnav-link"><span class="fnav-dot"></span>Soul FM &mdash; 1970s</a>
+        <a href="80s2.html"    class="fnav-link"><span class="fnav-dot"></span>Power 80s &mdash; 1980s</a>
+        <a href="90s2.html"    class="fnav-link"><span class="fnav-dot"></span>Altitude 99 &mdash; 1990s</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">Billboard Hot 100 data sourced from official year-end charts &middot; Audio previews &amp; imagery via iTunes Search API &middot; For educational and entertainment purposes</p>
+      <p class="footer-legal">Billboard Archive &copy; 1970–1999</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── iTunes image fetch ───────────────────────────────────
+  async function getArtwork(term) {
+    try {
+      const r = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=album&limit=3`
+      );
+      if (!r.ok) return null;
+      const d = await r.json();
+      const hit = d.results && d.results.find(x => x.artworkUrl100);
+      return hit ? hit.artworkUrl100.replace('100x100bb', '500x500bb') : null;
+    } catch { return null; }
+  }
+
+  // ── Hero wall ────────────────────────────────────────────
+  const heroTerms = [
+    'Michael Jackson', 'Madonna', 'Prince', 'Stevie Wonder',
+    'Whitney Houston', 'Elton John', 'Led Zeppelin', 'Marvin Gaye',
+    'Donna Summer', 'Earth Wind Fire', 'Nirvana', 'Mariah Carey',
+    'TLC group', 'Boyz II Men', 'ABBA', 'Fleetwood Mac'
+  ];
+
+  function buildHeroWall() {
+    const wall = document.getElementById('heroWall');
+    heroTerms.forEach((_, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'hero-cell';
+      cell.id = `hc${i}`;
+      wall.appendChild(cell);
+    });
+    heroTerms.forEach(async (term, i) => {
+      const url = await getArtwork(term);
+      const cell = document.getElementById(`hc${i}`);
+      if (!cell || !url) return;
+      const img = document.createElement('img');
+      img.alt = term;
+      img.onload = () => setTimeout(() => img.classList.add('in'), i * 70);
+      img.src = url;
+      cell.appendChild(img);
+    });
+  }
+
+  // ── Artist grids ─────────────────────────────────────────
+  const decades = {
+    '70s': [
+      { q: 'Stevie Wonder',    n: 'Stevie Wonder'      },
+      { q: 'Elton John',       n: 'Elton John'         },
+      { q: 'Donna Summer',     n: 'Donna Summer'       },
+      { q: 'Marvin Gaye',      n: 'Marvin Gaye'        },
+      { q: 'Led Zeppelin',     n: 'Led Zeppelin'       },
+      { q: 'ABBA',             n: 'ABBA'               },
+      { q: 'Earth Wind Fire',  n: 'Earth, Wind & Fire' },
+      { q: 'Fleetwood Mac',    n: 'Fleetwood Mac'      },
+    ],
+    '80s': [
+      { q: 'Michael Jackson',   n: 'Michael Jackson'   },
+      { q: 'Madonna',           n: 'Madonna'           },
+      { q: 'Prince',            n: 'Prince'            },
+      { q: 'Whitney Houston',   n: 'Whitney Houston'   },
+      { q: 'Bruce Springsteen', n: 'Bruce Springsteen' },
+      { q: 'Cyndi Lauper',      n: 'Cyndi Lauper'      },
+      { q: 'U2',                n: 'U2'                },
+      { q: 'Duran Duran',       n: 'Duran Duran'       },
+    ],
+    '90s': [
+      { q: 'Mariah Carey',      n: 'Mariah Carey'      },
+      { q: 'Nirvana',           n: 'Nirvana'           },
+      { q: 'TLC group',         n: 'TLC'               },
+      { q: 'Boyz II Men',       n: 'Boyz II Men'       },
+      { q: 'Alanis Morissette', n: 'Alanis Morissette' },
+      { q: 'Backstreet Boys',   n: 'Backstreet Boys'   },
+      { q: 'Tupac',             n: '2Pac'              },
+      { q: 'Spice Girls',       n: 'Spice Girls'       },
+    ]
+  };
+
+  function initials(name) {
+    return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  async function buildGrid(decade) {
+    const grid = document.getElementById(`ag-${decade}`);
+    const artists = decades[decade];
+
+    artists.forEach((a, i) => {
+      const card = document.createElement('div');
+      card.className = 'a-card';
+      card.innerHTML = `
+        <div class="a-card-init">${initials(a.n)}</div>
+        <div class="a-card-shade"><div class="a-card-name">${a.n}</div></div>`;
+      card.addEventListener('click', () => {
+        window.location.href = `artist2.html?artist=${encodeURIComponent(a.n)}`;
+      });
+      grid.appendChild(card);
+    });
+
+    artists.forEach(async (a, i) => {
+      const url = await getArtwork(a.q);
+      const card = grid.children[i];
+      if (!url || !card) return;
+      const img = document.createElement('img');
+      img.alt = a.n;
+      img.onload = () => {
+        const init = card.querySelector('.a-card-init');
+        if (init) init.style.display = 'none';
+        card.insertBefore(img, card.firstChild);
+      };
+      img.src = url;
+    });
+  }
+
+  // ── Stat counters ────────────────────────────────────────
+  function runCounter(el) {
+    const target = parseInt(el.dataset.target, 10);
+    const suffix = el.dataset.suffix || '';
+    const dur = 1400;
+    const t0 = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.floor(ease * target).toLocaleString() + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  // ── Intersection observers ───────────────────────────────
+  function setupIO() {
+    const revealIO = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          revealIO.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll(
+      '.fact-item, .pull-quote, .a-card, .w-card, .trend-bar'
+    ).forEach(el => revealIO.observe(el));
+
+    const statIO = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          runCounter(e.target);
+          statIO.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-num[data-target]').forEach(el => statIO.observe(el));
+  }
+
+  // ── Init ─────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    buildHeroWall();
+    buildGrid('70s');
+    buildGrid('80s');
+    buildGrid('90s');
+    setupIO();
+  });
+</script>
+</body>
+</html>

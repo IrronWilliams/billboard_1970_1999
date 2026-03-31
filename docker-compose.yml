@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile.node
     environment:
       PORT: 3001
-      DATABASE_URL: postgres://billboard:billboard@postgres:5432/billboard
+      DATABASE_URL: ${DATABASE_URL}
     volumes:
       - db_data:/app/data
       - /home/iwilliams/ProjectNotes/billboard_1970_1999_notes/AlbumArt:/app/albumart:ro
@@ -19,9 +19,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: billboard
-      POSTGRES_PASSWORD: billboard
-      POSTGRES_DB: billboard
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ratings_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
