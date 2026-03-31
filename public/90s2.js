@@ -49,6 +49,14 @@ let currentDecade = null;
   }
 })();
 
+// ── iOS AUDIO UNLOCK ──
+// iOS Safari blocks audio.play() in async callbacks. Unlock the audio element
+// on the first user touch so subsequent async play() calls work.
+document.addEventListener('touchstart', function() {
+  const p = audio.play();
+  if (p) p.then(() => audio.pause()).catch(() => {});
+}, { once: true, passive: true });
+
 // ── PLAY / PAUSE ──
 playBtn.addEventListener('click', () => {
   if (!hlsReady && !isPreviewMode) { setStatus('Buffering stream...'); return; }
