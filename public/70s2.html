@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul FM — 1970s Live Radio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Teko:wght@300;400;600;700&family=Zilla+Slab:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="70s2.css">
+</head>
+<body>
+<div class="page-wrap">
+  <div class="back-nav"><a href="billboard70_99.html" class="back-btn">&#8592; All Decades</a></div>
+  <div class="card">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="station">
+      <div class="station-name">SOUL FM</div>
+      <div class="station-sub">Billboard Hot 100 &middot; The 1970s</div>
+    </div>
+    <div class="media-row">
+      <div class="record-wrap">
+        <div class="record" id="record">
+          <div class="record-label">
+            <div class="record-label-name">SOUL</div>
+            <div class="record-label-fm">FM</div>
+          </div>
+        </div>
+        <div class="record-arm"></div>
+      </div>
+      <div class="artist-photo" id="artistPhotoWrap">
+        <img id="artistImg" src="" alt="" style="display:none">
+        <div class="artist-photo-placeholder" id="artistPlaceholder">
+          <div class="artist-initials" id="artistInitials"></div>
+          <div class="artist-photo-sub">Artist</div>
+        </div>
+      </div>
+    </div>
+    <div class="song-info">
+      <div id="songTitle">Select a song to preview</div>
+      <div id="artistName"></div>
+      <div id="songYear"></div>
+    </div>
+    <div class="waveform" id="waveform">
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+    <div class="controls">
+      <button class="state-play" id="playBtn">&#9654;</button>
+    </div>
+    <div class="video-btn-row">
+      <button id="videoBtn" style="display:none">&#9654; Video</button>
+    </div>
+    <div class="volume-row">
+      <span id="speakerIcon">&#128266;</span>
+      <input type="range" id="volSlider" min="0" max="1" step="0.01" value="1">
+      <span id="volPct">100%</span>
+    </div>
+    <div class="divider"></div>
+    <div class="rating-section">
+      <div class="rating-label">Rate this song</div>
+      <div class="rating-btns">
+        <button class="thumb-btn" id="thumbUp">&#128077; <span class="vote-count" id="upCount"></span></button>
+        <button class="thumb-btn" id="thumbDown">&#128078; <span class="vote-count" id="downCount"></span></button>
+      </div>
+    </div>
+    <div class="status-bar" id="status">Tune in &middot; Select a song to preview</div>
+    <div class="card-footer">Billboard &middot; Top 100 &middot; 1970&ndash;1979</div>
+  </div>
+
+  <section class="countdown-section">
+    <div class="countdown-header">
+      <div class="countdown-title-main">BILLBOARD</div>
+      <div class="countdown-title-sub">Top 100 Countdown</div>
+      <div class="countdown-desc">Year-end Hot 100 &middot; 1970 to 1979</div>
+    </div>
+    <div class="year-btns">
+      <button class="year-btn" data-year="1970">1970</button>
+      <button class="year-btn" data-year="1971">1971</button>
+      <button class="year-btn" data-year="1972">1972</button>
+      <button class="year-btn" data-year="1973">1973</button>
+      <button class="year-btn" data-year="1974">1974</button>
+      <button class="year-btn" data-year="1975">1975</button>
+      <button class="year-btn" data-year="1976">1976</button>
+      <button class="year-btn" data-year="1977">1977</button>
+      <button class="year-btn" data-year="1978">1978</button>
+      <button class="year-btn" data-year="1979">1979</button>
+    </div>
+    <div class="table-wrap" id="tableWrap">
+      <div class="table-year-bar">
+        <span class="table-year-num" id="tableYearNum"></span>
+        <span class="table-year-label">Billboard Year-End Hot 100</span>
+      </div>
+      <table class="countdown-table">
+        <thead><tr>
+          <th class="col-rank">#</th>
+          <th>Artist</th>
+          <th>Song</th>
+          <th class="col-riaa">RIAA</th>
+        </tr></thead>
+        <tbody id="countdownBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="video-modal" id="videoModal">
+  <div class="video-modal-inner">
+    <button class="video-modal-close" id="videoModalClose">&#10005;</button>
+    <p class="video-modal-label">iTunes 30-sec Preview</p>
+    <video id="videoPlayer" controls playsinline></video>
+  </div>
+</div>
+<script defer src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
+<script defer src="70s2.js"></script>
+</body>
+</html>

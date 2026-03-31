@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artist Profile | Billboard Radio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:         #0c0b09;
+      --surface:    #121110;
+      --surface2:   #1c1a16;
+      --rule:       #2a2620;
+      --sepia:      #c8a050;
+      --sepia-lt:   #e0c070;
+      --sepia-dk:   #8a6820;
+      --ink:        #f0ece0;
+      --ink-muted:  #8a8070;
+      --ink-dim:    #4a4438;
+      --green:      #4a8030;
+      --radius:     2px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'IBM Plex Serif', serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── MASTHEAD ── */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center;
+      padding: 0 32px;
+      height: 52px;
+      background: var(--bg);
+      border-bottom: 3px solid var(--sepia);
+      gap: 16px;
+    }
+    .header::before, .header::after {
+      content: '';
+      position: absolute; left: 32px; right: 32px;
+      height: 1px; background: var(--sepia);
+    }
+    .header::before { top: 8px; }
+    .header::after  { bottom: 8px; }
+    .back-btn {
+      position: relative; z-index: 1;
+      font-family: 'IBM Plex Mono'; font-size: .7rem; color: var(--ink-muted);
+      text-decoration: none; letter-spacing: .06em;
+      padding: 3px 8px; border: 1px solid var(--rule);
+      transition: color .18s, border-color .18s;
+    }
+    .back-btn:hover { color: var(--sepia); border-color: var(--sepia); }
+    .header-brand {
+      position: relative; z-index: 1;
+      font-family: 'Playfair Display'; font-weight: 700;
+      font-size: .82rem; letter-spacing: .25em; text-transform: uppercase; color: var(--sepia);
+      flex: 1; text-align: center;
+    }
+    .decade-badge {
+      position: relative; z-index: 1;
+      font-family: 'IBM Plex Mono'; font-size: .62rem; color: var(--ink-dim);
+      letter-spacing: .08em;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 280px;
+      display: flex; align-items: flex-end;
+      padding: 56px 40px 36px; overflow: hidden;
+    }
+    .hero-bg-base { position:absolute; inset:0; background:linear-gradient(135deg,#1a1204 0%,#0c0b09 50%,#060808 100%); }
+    .hero-bg-art { position:absolute; inset:0; background-size:cover; background-position:center; opacity:0; filter:blur(40px); transition:opacity .5s; }
+    .hero-bg-art.ready { opacity:.14; }
+    .hero-gradient { position:absolute; inset:0; background:linear-gradient(to top,var(--bg) 0%,transparent 65%); }
+    .hero-content {
+      position: relative; z-index: 2;
+      display: grid; grid-template-columns: 200px 1fr; gap: 40px;
+      align-items: end; width: 100%; max-width: 1100px; margin: 0 auto;
+    }
+    .hero-art {
+      width: 200px; height: 200px; overflow: hidden; flex-shrink: 0;
+      border: 1px solid var(--rule);
+      box-shadow: 4px 4px 0 var(--sepia-dk);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface2);
+    }
+    .hero-art img { width:100%; height:100%; object-fit:cover; display:block; }
+    .hero-art-initials {
+      font-family:'Playfair Display'; font-weight:900; font-style:italic;
+      font-size: 56px; color: var(--sepia); line-height: 1;
+    }
+    .hero-text { min-width: 0; }
+    .hero-eyebrow {
+      font-family:'IBM Plex Mono'; font-size:.62rem; letter-spacing:.18em;
+      text-transform:uppercase; color:var(--sepia); margin-bottom:10px; display:block;
+    }
+    .hero-name {
+      font-family:'Playfair Display'; font-weight:900;
+      font-size:clamp(28px,5vw,58px); line-height:1; letter-spacing:-.01em;
+      margin-bottom:12px; text-transform:uppercase;
+    }
+    .hero-song-line {
+      font-family:'IBM Plex Serif'; font-size:.95rem; color:var(--ink-muted);
+      font-style:italic; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    }
+    .year-pill {
+      display:inline-block; padding:2px 9px; font-style:normal;
+      font-family:'IBM Plex Mono'; font-size:.62rem; color:var(--sepia);
+      border:1px solid var(--sepia-dk);
+    }
+
+    /* ── MAIN ── */
+    .main { max-width:1100px; margin:0 auto; padding:40px 40px 80px; }
+
+    /* Loading */
+    .loading-screen {
+      display:flex; align-items:center; justify-content:center;
+      padding:80px 32px; color:var(--ink-muted); font-family:'IBM Plex Mono'; font-size:.72rem; gap:10px;
+    }
+    .spinner {
+      width:16px; height:16px; border:2px solid var(--rule);
+      border-top-color:var(--sepia); border-radius:50%;
+      animation:spin .7s linear infinite; flex-shrink:0;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* ── STATS ROW (pull-quote grid) ── */
+    .stats-row {
+      display:grid; grid-template-columns:repeat(6,1fr);
+      border:1px solid var(--rule); margin-bottom:36px;
+    }
+    .stat-card {
+      padding:20px 12px 16px; text-align:center;
+      border-right:1px solid var(--rule);
+    }
+    .stat-card:last-child { border-right:none; }
+    .stat-num {
+      font-family:'IBM Plex Mono'; font-weight:600; font-size:2.4rem;
+      color:var(--sepia); line-height:1; margin-bottom:7px;
+      font-variant-numeric:tabular-nums;
+    }
+    .stat-num.sm { font-size:1.6rem; }
+    .stat-lbl {
+      font-family:'Playfair Display'; font-style:italic; font-weight:700;
+      font-size:.68rem; color:var(--ink-muted); line-height:1.4;
+    }
+
+    /* ── HIGHLIGHTS ── */
+    .highlight-row {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:1px; background:var(--rule); margin-bottom:36px;
+    }
+    .hl-card { background:var(--surface); padding:16px 18px; }
+    .hl-label {
+      font-family:'IBM Plex Mono'; font-size:.58rem; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--sepia); margin-bottom:7px;
+    }
+    .hl-song {
+      font-family:'Playfair Display'; font-weight:700; font-style:italic;
+      font-size:.95rem; color:var(--ink); margin-bottom:4px;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .hl-meta { font-family:'IBM Plex Mono'; font-size:.6rem; color:var(--ink-muted); }
+
+    /* ── SECTION HEADERS ── */
+    .section-hd {
+      display:flex; align-items:center; gap:14px; margin-bottom:14px;
+    }
+    .section-hd-text {
+      font-family:'IBM Plex Mono'; font-size:.6rem; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--sepia); white-space:nowrap;
+    }
+    .section-hd-line { flex:1; height:1px; background:var(--sepia-dk); }
+
+    /* ── TWO COLUMN LAYOUT ── */
+    .two-col { display:grid; grid-template-columns:1fr 320px; gap:28px; margin-bottom:36px; }
+    @media (max-width:680px) { .two-col { grid-template-columns:1fr; } }
+
+    /* ── PANEL (selected song + bio) ── */
+    .panel { background:var(--surface); border:1px solid var(--sepia); overflow:hidden; }
+    .panel-head {
+      padding:13px 18px; border-bottom:1px solid var(--rule);
+      display:flex; align-items:center; gap:8px;
+    }
+    .panel-dot { width:5px; height:5px; border-radius:50%; background:var(--sepia); flex-shrink:0; }
+    .panel-title {
+      font-family:'IBM Plex Mono'; font-size:.62rem; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--sepia);
+    }
+    .panel-body { padding:16px 18px; }
+    .info-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:9px 0; border-bottom:1px solid var(--rule); gap:12px;
+    }
+    .info-row:last-child { border-bottom:none; }
+    .info-key { font-family:'IBM Plex Mono'; font-size:.65rem; color:var(--ink-muted); flex-shrink:0; }
+    .info-val { font-family:'IBM Plex Serif'; font-size:.82rem; font-weight:600; text-align:right; }
+
+    /* Position badges */
+    .pos-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; font-family:'IBM Plex Mono'; font-size:.7rem; font-weight:600; }
+    .pos-1   { color:var(--sepia); border:1px solid var(--sepia-dk); }
+    .pos-5   { color:#4a8030; border:1px solid rgba(74,128,48,.3); }
+    .pos-10  { color:#4a7080; border:1px solid rgba(74,112,128,.3); }
+    .pos-any { color:var(--ink-muted); border:1px solid var(--rule); }
+    .star-flag { color:var(--sepia); font-size:.7rem; margin-left:3px; }
+
+    /* ── BIOGRAPHY ── */
+    .bio-text {
+      font-family:'IBM Plex Serif'; font-size:.88rem; line-height:1.9;
+      color:var(--ink-muted); text-align:justify; hyphens:auto;
+    }
+    .bio-source { margin-top:10px; font-family:'IBM Plex Mono'; font-size:.58rem; color:var(--ink-dim); }
+    .bio-source a { color:var(--sepia); text-decoration:none; }
+    .bio-source a:hover { text-decoration:underline; }
+
+    /* ── TABLE WRAP ── */
+    .table-wrap {
+      background:var(--surface); border:1px solid var(--rule);
+      overflow:hidden; margin-bottom:36px;
+    }
+    .ht { width:100%; border-collapse:collapse; }
+    .ht thead th {
+      padding:10px 14px; font-family:'IBM Plex Mono'; font-size:.58rem; font-weight:600;
+      text-transform:uppercase; letter-spacing:.1em; color:var(--sepia);
+      border-bottom:1px solid var(--sepia-dk); text-align:left;
+      background:var(--surface2);
+    }
+    .ht tbody tr { transition:background .12s; }
+    .ht tbody tr:hover { background:rgba(255,255,255,.02); }
+    .ht tbody tr.selected { background:rgba(200,160,80,.06); border-left:2px solid var(--sepia); }
+    .ht tbody td {
+      padding:10px 14px; font-size:.82rem;
+      border-bottom:1px solid var(--rule); vertical-align:middle;
+    }
+    .ht tbody tr:last-child td { border-bottom:none; }
+    .rk {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:28px; height:28px;
+      font-family:'IBM Plex Mono'; font-size:.7rem; font-weight:600;
+    }
+    .rk-1   { color:var(--sepia); }
+    .rk-5   { color:var(--green); }
+    .rk-10  { color:#4a7080; }
+    .rk-any { color:var(--ink-dim); }
+    .song-cell { font-family:'IBM Plex Serif'; font-weight:600; max-width:260px; }
+    .song-cell.cur { color:var(--sepia); }
+    .cur-tag { font-family:'IBM Plex Mono'; font-size:.58rem; color:var(--ink-dim); margin-left:6px; }
+    .yr-chip {
+      display:inline-block; padding:1px 7px; font-family:'IBM Plex Mono'; font-size:.62rem;
+      color:var(--ink-muted); background:var(--surface2); margin:1px 2px 1px 0;
+    }
+    .riaa-chip {
+      display:inline-block; padding:1px 8px; font-family:'IBM Plex Mono'; font-size:.62rem;
+      color:var(--green); border:1px solid rgba(74,128,48,.2);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 580px) {
+      .header { padding: 0 16px; }
+      .hero { padding: 36px 16px 24px; }
+      .hero-content { grid-template-columns: 1fr; gap: 16px; }
+      .hero-art { width: 100px; height: 100px; }
+      .hero-name { font-size: 28px; }
+      .main { padding: 24px 16px 60px; }
+      .stats-row { grid-template-columns: repeat(3,1fr); }
+      .ht tbody td, .ht thead th { padding: 8px 10px; }
+      .bio-text { text-align: left; hyphens: none; }
+    }
+    @media (max-width: 360px) {
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .hero-name { font-size: 22px; }
+    }
+
+  </style>
+</head>
+<body>
+<header class="header">
+  <a class="back-btn" href="javascript:history.back()">&#8592; Back</a>
+  <span class="header-brand">Billboard Radio</span>
+  <span class="decade-badge" id="decadeBadge"></span>
+</header>
+
+<div class="hero">
+  <div class="hero-bg-base"></div>
+  <div class="hero-bg-art" id="heroBgArt"></div>
+  <div class="hero-gradient"></div>
+  <div class="hero-content">
+    <div class="hero-art" id="heroArt">
+      <div class="hero-art-initials" id="heroInitials"></div>
+    </div>
+    <div class="hero-text">
+      <span class="hero-eyebrow">Artist Profile</span>
+      <div class="hero-name" id="heroArtist"></div>
+      <div class="hero-song-line" id="heroSongLine"></div>
+    </div>
+  </div>
+</div>
+
+<main class="main" id="main">
+  <div class="loading-screen"><div class="spinner"></div>Loading profile&hellip;</div>
+</main>
+<script>
+// ── URL params ──────────────────────────────────────
+const params = new URLSearchParams(location.search);
+const ARTIST = (params.get('artist') || '').trim();
+const SONG   = (params.get('song')   || '').trim();
+const YEAR   = (params.get('year')   || '').trim();
+
+// ── Helpers ─────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Mirror the server-side normSong: strip trailing subtitle before comparing.
+// Lets "Two Steps Behind" match "Two Steps Behind (From \"Last Action Hero\")".
+function normTitle(s) {
+  const stripped = s.replace(/\s*\([^)]*\)\s*$/, '').trim() || s;
+  return stripped.toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function initials(name) {
+  return name.replace(/[^a-zA-Z\s]/g,'')
+    .split(/\s+/).filter(Boolean)
+    .map(w => w[0].toUpperCase()).slice(0,2).join('');
+}
+
+function decadeOf(yr) {
+  const y = parseInt(yr,10);
+  return y ? `The ${Math.floor(y/10)*10}s` : '';
+}
+
+function rankBadgeClass(pos) {
+  if (pos === 1)  return 'rk rk-1';
+  if (pos <= 5)   return 'rk rk-5';
+  if (pos <= 10)  return 'rk rk-10';
+  return 'rk rk-any';
+}
+
+function posBadge(pos) {
+  if (!pos) return `<span class="pos-badge pos-any">—</span>`;
+  let cls, label;
+  if (pos === 1)  { cls = 'pos-1';  label = '&#127942; #1'; }
+  else if (pos <= 5)  { cls = 'pos-5';  label = `#${pos}`; }
+  else if (pos <= 10) { cls = 'pos-10'; label = `#${pos}`; }
+  else            { cls = 'pos-any'; label = `#${pos}`; }
+  return `<span class="pos-badge ${cls}">${label}</span>`;
+}
+
+// ── Render header immediately ────────────────────────
+document.title = ARTIST ? `${ARTIST} | Billboard` : 'Artist Profile | Billboard';
+document.getElementById('heroArtist').textContent  = ARTIST;
+document.getElementById('heroInitials').textContent = initials(ARTIST);
+if (YEAR) document.getElementById('decadeBadge').textContent = decadeOf(YEAR);
+
+if (SONG) {
+  document.getElementById('heroSongLine').innerHTML =
+    `<span class="hero-song-name">"${esc(SONG)}"</span>` +
+    (YEAR ? `<span class="year-pill">${esc(YEAR)}</span>` : '');
+}
+
+// ── Album art ───────────────────────────────────────
+const artSrc = `/api/albumart?artist=${encodeURIComponent(ARTIST)}&year=${encodeURIComponent(YEAR)}`;
+const probe  = new Image();
+probe.onload = () => {
+  document.getElementById('heroArt').innerHTML =
+    `<img src="${artSrc}" alt="${esc(ARTIST)}">`;
+  const bg = document.getElementById('heroBgArt');
+  bg.style.backgroundImage = `url(${artSrc})`;
+  requestAnimationFrame(() => bg.classList.add('ready'));
+};
+probe.onerror = () => {
+  fetchWiki(ARTIST).then(data => {
+    const thumb = data && data.thumbnail && data.thumbnail.source;
+    if (!thumb) return;
+    document.getElementById('heroArt').innerHTML =
+      `<img src="${thumb}" alt="${esc(ARTIST)}">`;
+    const bg = document.getElementById('heroBgArt');
+    bg.style.backgroundImage = `url(${thumb})`;
+    requestAnimationFrame(() => bg.classList.add('ready'));
+  });
+};
+probe.src = artSrc;
+
+// ── Wikipedia: try bare name, then music-specific suffixes ──────────────────
+// Needed for artists like "Prince" or "The Band" where the bare name returns
+// a disambiguation page or a non-music article (e.g. royalty, a common noun).
+const MUSIC_RE = /musician|singer|songwriter|rapper|band|group|producer|vocalist|rock|pop|r&b|soul|jazz|country|composer|guitarist|drummer/i;
+
+function fetchWiki(name) {
+  const tries = [name, name + ' (musician)', name + ' (singer)', name + ' (band)', name + ' (rapper)'];
+  function attempt(i) {
+    if (i >= tries.length) return Promise.resolve(null);
+    return fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tries[i])}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || data.type === 'disambiguation') return attempt(i + 1);
+        const text = (data.description || '') + ' ' + (data.extract || '').slice(0, 300);
+        // On the first (bare name) try, reject if it doesn't look like a music article
+        if (i === 0 && !MUSIC_RE.test(text)) return attempt(i + 1);
+        return data;
+      })
+      .catch(() => attempt(i + 1));
+  }
+  return attempt(0);
+}
+
+// ── Fetch chart data + Wikipedia ────────────────────
+Promise.all([
+  fetch(`/api/artist-stats?artist=${encodeURIComponent(ARTIST)}`).then(r=>r.json()).catch(()=>null),
+  fetch(`/api/song-stats?artist=${encodeURIComponent(ARTIST)}&song=${encodeURIComponent(SONG)}`).then(r=>r.json()).catch(()=>null),
+  fetchWiki(ARTIST)
+]).then(([stats, songData, wiki]) => render(stats, songData, wiki));
+
+// ── Render ───────────────────────────────────────────
+function render(stats, songData, wiki) {
+  const main = document.getElementById('main');
+
+  if (!stats || !stats.found) {
+    main.innerHTML = `
+      <div style="text-align:center;padding:80px 32px;">
+        <div style="font-size:36px;margin-bottom:12px;">&#127925;</div>
+        <h2 style="color:var(--gold);margin-bottom:8px;">Artist Not Found</h2>
+        <p style="color:var(--text-muted);">No chart data for "${esc(ARTIST)}".</p>
+      </div>`;
+    return;
+  }
+
+  const {
+    totalSingles, top10, top5, top1,
+    highestSingle, lowestSingle, longestRunning,
+    firstYear, lastYear, allSongs
+  } = stats;
+
+  // ── Stat cards ──────────────────────────────────────
+  const chartYears = (stats.allYears && stats.allYears.length)
+    ? stats.allYears
+    : (firstYear ? [firstYear] : []);
+
+  const statCardsHtml = `
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">${totalSingles}</div>
+        <div class="stat-lbl">Charted<br>Singles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${top10}</div>
+        <div class="stat-lbl">Top 10<br>Hits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${top5}</div>
+        <div class="stat-lbl">Top 5<br>Hits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${top1}</div>
+        <div class="stat-lbl">Number<br>One Hits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num sm">#${highestSingle ? highestSingle.bestPosition : '—'}</div>
+        <div class="stat-lbl">Best Chart<br>Position</div>
+      </div>
+      <div class="stat-card">
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:3px;margin-bottom:8px;">
+          ${chartYears.map(y => `<span style="font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;background:var(--surface3);color:var(--gold-lt);font-variant-numeric:tabular-nums;">${y}</span>`).join('')}
+        </div>
+        <div class="stat-lbl">Years on<br>Chart</div>
+      </div>
+    </div>`;
+
+  // ── Highlights ──────────────────────────────────────
+  const hlCards = [
+    highestSingle && {
+      label: 'Highest Charting Single',
+      song:  highestSingle.song,
+      meta:  (() => {
+        const base  = `Peak #${highestSingle.bestPosition}`;
+        const tied  = allSongs.filter(s => s.bestPosition === highestSingle.bestPosition);
+        if (tied.length > 1) {
+          return `${base} · Longest run among ${tied.length} #${highestSingle.bestPosition} singles · Single spent ${highestSingle.totalWeeks} weeks on the charts`;
+        }
+        const from = highestSingle.firstDate ? highestSingle.firstDate.replace(/\s+\d+,/, '') : null;
+        const to   = highestSingle.lastDate  ? highestSingle.lastDate.replace(/\s+\d+,/, '')  : null;
+        return from && to && from !== to ? `${base} · single on charts between ${from} – ${to}` : from ? `${base} · single on charts during ${from}` : base;
+      })()
+    },
+    lowestSingle && lowestSingle.song !== highestSingle.song && {
+      label: 'Lowest Charting Single',
+      song:  lowestSingle.song,
+      meta:  (() => {
+        const from = lowestSingle.firstDate ? lowestSingle.firstDate.replace(/\s+\d+,/, '') : null;
+        const to   = lowestSingle.lastDate  ? lowestSingle.lastDate.replace(/\s+\d+,/, '')  : null;
+        const base = `Peak #${lowestSingle.bestPosition}`;
+        return from && to && from !== to ? `${base} · single on charts between ${from} – ${to}` : from ? `${base} · single on charts during ${from}` : base;
+      })()
+    },
+    longestRunning && longestRunning.totalWeeks > 1 && {
+      label: 'Longest Running Single',
+      song:  longestRunning.song,
+      meta:  (() => {
+        const wks  = `${longestRunning.totalWeeks} weeks`;
+        const from = longestRunning.firstDate ? longestRunning.firstDate.replace(/\s+\d+,/, '') : null;
+        const to   = longestRunning.lastDate  ? longestRunning.lastDate.replace(/\s+\d+,/, '')  : null;
+        return from && to && from !== to ? `${wks} · ${from} – ${to}` : wks;
+      })()
+    }
+  ].filter(Boolean);
+
+  const hlHtml = hlCards.length ? `
+    <div class="section-hd">
+      <span class="section-hd-text">Highlights</span>
+      <span class="section-hd-line"></span>
+    </div>
+    <div class="highlight-row">
+      ${hlCards.map(c => `
+        <div class="hl-card">
+          <div class="hl-label">${esc(c.label)}</div>
+          <div class="hl-song" title="${esc(c.song)}">${esc(c.song)}</div>
+          <div class="hl-meta">${esc(c.meta)}</div>
+        </div>`).join('')}
+    </div>` : '';
+
+  // ── Song stats panel ────────────────────────────────
+  const sd = songData && songData.found ? songData : null;
+  const songPeak = sd ? sd.peakPosition
+    : (allSongs.find(s => normTitle(s.song) === normTitle(SONG)) || {}).bestPosition || null;
+
+  const isHighest = highestSingle  && normTitle(highestSingle.song)  === normTitle(SONG);
+  const isLongest = longestRunning && normTitle(longestRunning.song)  === normTitle(SONG);
+
+  const songPanelHtml = SONG ? `
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-dot"></span>
+        <span class="panel-title">Selected Song</span>
+      </div>
+      <div class="panel-body">
+        <div class="info-row">
+          <span class="info-key">Song</span>
+          <span class="info-val" style="font-style:italic;">${esc(SONG)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Year</span>
+          <span class="info-val">${YEAR || '—'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Peak Chart Position</span>
+          <span class="info-val">${posBadge(songPeak)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Date First Charted</span>
+          <span class="info-val">${sd ? (sd.firstDate || sd.firstYear) : (YEAR || '—')}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Total Weeks on Chart</span>
+          <span class="info-val">${sd ? sd.totalWeeks : '—'}</span>
+        </div>
+        ${isHighest ? `
+        <div class="info-row">
+          <span class="info-key">Artist's Best Charting Song</span>
+          <span class="info-val" style="color:var(--gold);">&#9733; peaked at #${highestSingle.bestPosition}</span>
+        </div>` : ''}
+        ${isLongest ? `
+        <div class="info-row">
+          <span class="info-key">Artist's Longest Running Song</span>
+          <span class="info-val" style="color:var(--gold);">&#9733; ${longestRunning.totalWeeks} weeks on chart</span>
+        </div>` : ''}
+      </div>
+    </div>` : '';
+
+  // ── Biography panel ──────────────────────────────────
+  let bioBody;
+  if (wiki && wiki.extract) {
+    const text = wiki.extract.length > 700
+      ? wiki.extract.slice(0, 700).replace(/\s+\S+$/, '') + '…'
+      : wiki.extract;
+    const wikiLink = wiki.content_urls && wiki.content_urls.desktop
+      ? wiki.content_urls.desktop.page : '#';
+    bioBody = `
+      <p class="bio-text">${esc(text)}</p>
+      <p class="bio-source">Source: <a href="${wikiLink}" target="_blank" rel="noopener noreferrer">Wikipedia</a></p>`;
+  } else {
+    bioBody = `<p class="bio-text" style="font-style:italic;font-size:13px;">
+      No biography available for this artist.</p>`;
+  }
+
+  const bioPanelHtml = `
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-dot"></span>
+        <span class="panel-title">Biography</span>
+      </div>
+      <div class="panel-body">${bioBody}</div>
+    </div>`;
+
+  // ── Chart history ────────────────────────────────────
+  const tableRows = allSongs.map(s => {
+    const isCur = normTitle(s.song) === normTitle(SONG);
+    const rc    = rankBadgeClass(s.bestPosition);
+    return `
+      <tr class="${isCur ? 'selected' : ''}">
+        <td><span class="${rc}">${s.bestPosition}</span></td>
+        <td class="song-cell ${isCur ? 'cur' : ''}" title="${esc(s.song)}">
+          ${esc(s.song)}${isCur ? '<span class="cur-tag">← selected</span>' : ''}
+        </td>
+        <td style="font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;">${s.totalWeeks}</td>
+        <td>${s.years.map(y => `<span class="yr-chip">${y}</span>`).join('')}</td>
+        <td style="font-size:12px;color:var(--text-muted);">${s.firstDate || s.firstYear || '—'}</td>
+      </tr>`;
+  }).join('');
+
+  const historyHtml = `
+    <div class="section-hd">
+      <span class="section-hd-text">Full Chart History — ${totalSingles} song${totalSingles !== 1 ? 's' : ''}</span>
+      <span class="section-hd-line"></span>
+    </div>
+    <div class="table-wrap">
+      <table class="ht">
+        <thead>
+          <tr>
+            <th>Peak</th>
+            <th>Song</th>
+            <th>Weeks</th>
+            <th>Year(s)</th>
+            <th>First Charted</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>`;
+
+  // ── Assemble ─────────────────────────────────────────
+  const twoColHtml = songPanelHtml
+    ? `<div class="two-col">${songPanelHtml}${bioPanelHtml}</div>`
+    : bioPanelHtml;
+
+  main.innerHTML = statCardsHtml + hlHtml + twoColHtml + historyHtml;
+}
+</script>
+</body>
+</html>

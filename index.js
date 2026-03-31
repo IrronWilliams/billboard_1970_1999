@@ -2,6 +2,7 @@ const express = require('express');
 const fs      = require('fs');
 const path    = require('path');
 const db = require('./db');
+const ratingsRouter = require('./routes/ratings');
 
 // ── CSV helper ──────────────────────────────────────────────────────────────
 function parseCSVLine(line) {
@@ -169,11 +170,13 @@ function getAliasedEntries(np) {
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+app.use('/api/ratings', ratingsRouter);
 
 // ── ALBUM ART ────────────────────────────────────────────────────────────────
 // Connector words that appear in CSV artist names but are often dropped or

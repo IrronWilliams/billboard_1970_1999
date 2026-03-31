@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power 80s — 1980s Live Radio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@300;400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="80s2.css">
+</head>
+<body>
+<div class="page-wrap">
+  <div class="back-nav"><a href="billboard70_99.html" class="back-btn">&#8592; All Decades</a></div>
+  <div class="card">
+    <div class="card-header">
+      <div class="station-name">
+        <span class="name-line1">POWER</span>
+        <span class="name-line2">80s</span>
+      </div>
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    </div>
+    <div class="media-row">
+      <div class="cassette" id="record">
+        <div class="cassette-label">
+          <div class="cassette-label-title">POWER 80s</div>
+          <div class="cassette-label-sub">SIDE A &middot; 46 MIN</div>
+        </div>
+        <div class="cassette-window">
+          <div class="reel"></div>
+          <div class="tape-strip"></div>
+          <div class="reel"></div>
+        </div>
+        <div class="screw screw-tl"></div>
+        <div class="screw screw-tr"></div>
+        <div class="screw screw-bl"></div>
+        <div class="screw screw-br"></div>
+      </div>
+      <div class="media-info">
+        <div class="artist-photo" id="artistPhotoWrap">
+          <img id="artistImg" src="" alt="" style="display:none">
+          <div class="artist-photo-placeholder" id="artistPlaceholder">
+            <div class="artist-initials" id="artistInitials"></div>
+            <div class="artist-photo-sub">Artist</div>
+          </div>
+        </div>
+        <div class="song-info">
+          <div id="songTitle">Select a track</div>
+          <div id="artistName"></div>
+          <div id="songYear"></div>
+        </div>
+      </div>
+    </div>
+    <div class="waveform" id="waveform">
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+    <div class="controls">
+      <button class="state-play" id="playBtn">PLAY</button>
+    </div>
+    <div class="video-btn-row">
+      <button id="videoBtn" style="display:none">&#9654; VIDEO</button>
+    </div>
+    <div class="volume-row">
+      <span id="speakerIcon">&#128266;</span>
+      <input type="range" id="volSlider" min="0" max="1" step="0.01" value="1">
+      <span id="volPct">100%</span>
+    </div>
+    <div class="rating-section">
+      <div class="rating-label">// RATE THIS TRACK</div>
+      <div class="rating-btns">
+        <button class="thumb-btn" id="thumbUp">&#128077; <span class="vote-count" id="upCount"></span></button>
+        <button class="thumb-btn" id="thumbDown">&#128078; <span class="vote-count" id="downCount"></span></button>
+      </div>
+    </div>
+    <div class="status-bar" id="status">// READY _ SELECT A TRACK</div>
+    <div class="card-footer">BILLBOARD &middot; HOT 100 &middot; 1980&ndash;1989</div>
+  </div>
+
+  <section class="countdown-section">
+    <div class="countdown-header">
+      <div class="countdown-title-main">BILLBOARD</div>
+      <div class="countdown-title-sub">COUNTDOWN</div>
+      <div class="countdown-desc">// YEAR-END HOT 100 &middot; 1980 TO 1989</div>
+    </div>
+    <div class="year-btns">
+      <button class="year-btn" data-year="1980">1980</button>
+      <button class="year-btn" data-year="1981">1981</button>
+      <button class="year-btn" data-year="1982">1982</button>
+      <button class="year-btn" data-year="1983">1983</button>
+      <button class="year-btn" data-year="1984">1984</button>
+      <button class="year-btn" data-year="1985">1985</button>
+      <button class="year-btn" data-year="1986">1986</button>
+      <button class="year-btn" data-year="1987">1987</button>
+      <button class="year-btn" data-year="1988">1988</button>
+      <button class="year-btn" data-year="1989">1989</button>
+    </div>
+    <div class="table-wrap" id="tableWrap">
+      <div class="table-year-bar">
+        <span class="table-year-num" id="tableYearNum"></span>
+        <span class="table-year-label">// BILLBOARD YEAR-END HOT 100</span>
+      </div>
+      <table class="countdown-table">
+        <thead><tr>
+          <th class="col-rank">#</th>
+          <th>Artist</th>
+          <th>Song</th>
+          <th class="col-riaa">RIAA</th>
+        </tr></thead>
+        <tbody id="countdownBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="video-modal" id="videoModal">
+  <div class="video-modal-inner">
+    <button class="video-modal-close" id="videoModalClose">&#10005;</button>
+    <p class="video-modal-label">iTunes 30-sec Preview</p>
+    <video id="videoPlayer" controls playsinline></video>
+  </div>
+</div>
+<script defer src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
+<script defer src="80s2.js"></script>
+</body>
+</html>
